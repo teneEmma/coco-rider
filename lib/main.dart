@@ -1,4 +1,4 @@
-import 'package:coco_rider/constants/constants.dart';
+import 'package:coco_rider/constants/coco_constants.dart';
 import 'package:flutter/material.dart';
 
 void main() {
