@@ -54,3 +54,5 @@ app.*.map.json
 
 # Generated goldens failure images
 **/failures/*.png
+
+pubspec.lock
