@@ -1,5 +1,5 @@
-import 'package:coco_rider/constants/coco_constants.dart';
 import 'package:coco_rider/constants/internalization.dart';
+import 'package:coco_rider/navigation/coco_navigation.dart';
 import 'package:coco_rider/pages/authentication/phone_authentication.dart';
 import 'package:coco_rider/services/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -20,12 +20,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // theme: ,
       home: GetMaterialApp(
         translations: CocoInternalization(),
         locale: Get.deviceLocale,
         fallbackLocale: const Locale('en', 'UK'),
-        title: CocoConstants.appName,
+        getPages: CocoNavigation.pages,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
