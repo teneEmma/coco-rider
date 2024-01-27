@@ -1,5 +1,5 @@
+import 'package:coco_rider/common/navigation/coco_navigation.dart';
 import 'package:coco_rider/constants/internalization.dart';
-import 'package:coco_rider/navigation/coco_navigation.dart';
 import 'package:coco_rider/pages/authentication/phone_authentication.dart';
 import 'package:coco_rider/services/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
