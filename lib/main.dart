@@ -25,10 +25,8 @@ class MyApp extends StatelessWidget {
         locale: Get.deviceLocale,
         fallbackLocale: const Locale('en', 'UK'),
         getPages: CocoNavigation.pages,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
+        theme: CocoTheme.lightTheme,
+        darkTheme: CocoTheme.darkTheme,
         home: const PhoneAuthentication(),
       ),
     );
