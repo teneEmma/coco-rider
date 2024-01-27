@@ -1,4 +1,4 @@
-import 'package:coco_rider/navigation/routes.dart';
+import 'package:coco_rider/common/navigation/routes.dart';
 import 'package:coco_rider/pages/authentication/phone_authentication.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
 
