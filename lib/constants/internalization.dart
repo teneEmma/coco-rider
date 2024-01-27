@@ -18,4 +18,6 @@ class CocoInternalization extends Translations {
 class InternalizationKeys {
   static const enterPhoneNumberText = 'enterPhoneNumberText';
   static const nextText = 'nextText';
+  static const prefixForPhoneNumberTextField = '+237';
+  static const hintForPhoneNumberTextField = '000 000 000';
 }
