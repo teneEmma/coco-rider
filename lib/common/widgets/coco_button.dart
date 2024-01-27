@@ -63,8 +63,8 @@ class CocoButton extends StatelessWidget {
         };
 
         return SizedBox(
-          width: width ?? double.infinity,
-          height: height ?? 50,
+          width: width ?? 380,
+          height: height ?? 70,
           child: child,
         );
       },

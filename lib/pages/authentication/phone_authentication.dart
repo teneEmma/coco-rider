@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:coco_rider/common/theme/coco_text_styles.dart';
 import 'package:coco_rider/common/widgets/coco_button.dart';
 import 'package:coco_rider/constants/coco_colors.dart';
 import 'package:coco_rider/constants/coco_constants.dart';
@@ -9,7 +10,7 @@ import 'package:coco_rider/pages/authentication/phone_authentication_controller.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get_utils/get_utils.dart';
+import 'package:get/get.dart';
 
 class PhoneAuthentication extends StatelessWidget {
   const PhoneAuthentication({super.key});
@@ -25,7 +26,9 @@ class PhoneAuthentication extends StatelessWidget {
           elevation: 0,
           title: Center(
               child: Image.asset(
-            ImageKeys.keyLogoImageWithoutBGDark,
+            Get.isDarkMode
+                ? ImageKeys.keyLogoImageWithoutBGGreen
+                : ImageKeys.keyLogoImageWithoutBGDark,
           )),
           flexibleSpace: ClipRect(
             child: BackdropFilter(
@@ -38,7 +41,7 @@ class PhoneAuthentication extends StatelessWidget {
               ),
             ),
           ),
-          backgroundColor: CocoColors.keyWhite.withAlpha(200),
+          backgroundColor: Theme.of(context).colorScheme.background,
         ),
         body: SafeArea(
           child: Padding(
@@ -53,10 +56,7 @@ class PhoneAuthentication extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 15.0),
                       child: Text(
                         InternalizationKeys.enterPhoneNumberText.tr,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.headlineMedium,
                       ),
                     ),
                     ConstrainedBox(
@@ -66,40 +66,12 @@ class PhoneAuthentication extends StatelessWidget {
                         controller: phoneAuthenticationController
                             .phoneNumberTextController,
                         textAlign: TextAlign.start,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          wordSpacing: 3,
-                          letterSpacing: 2,
-                          color: CocoColors.keyBlack,
-                        ),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              wordSpacing: 3,
+                              letterSpacing: 2,
+                            ),
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
-                          filled: true,
-                          fillColor: CocoColors.keyGrey.withOpacity(0.3),
-                          focusedBorder: const OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(20.0)),
-                            borderSide: BorderSide(
-                                width: 3, color: CocoColors.keyPrimary),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(20.0)),
-                            borderSide: BorderSide(
-                                width: 3,
-                                color: CocoColors.keyPrimary.withAlpha(50)),
-                          ),
-                          errorBorder: const OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(20.0)),
-                            borderSide: BorderSide(
-                                width: 3, color: CocoColors.keyError),
-                          ),
-                          errorStyle: const TextStyle(
-                            color: CocoColors.keyError,
-                            fontWeight: FontWeight.w200,
-                            fontStyle: FontStyle.italic,
-                          ),
                           prefixIcon: Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
@@ -111,27 +83,16 @@ class PhoneAuthentication extends StatelessWidget {
                                   width: 35,
                                 ),
                                 const SizedBox(width: 5),
-                                const Text(
-                                  '+237',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    color: CocoColors.keyBlack,
-                                  ),
+                                Text(
+                                  InternalizationKeys
+                                      .prefixForPhoneNumberTextField,
+                                  style: Theme.of(context).textTheme.bodyLarge,
                                 ),
                               ],
                             ),
                           ),
-                          prefixStyle: const TextStyle(
-                            fontSize: 24,
-                            color: CocoColors.keyBlack,
-                          ),
-                          hintText: '000 000 000',
-                          hintStyle: TextStyle(
-                            fontSize: 24,
-                            wordSpacing: 3,
-                            letterSpacing: 2,
-                            color: CocoColors.keyBlack.withAlpha(80),
-                          ),
+                          hintText:
+                              InternalizationKeys.hintForPhoneNumberTextField,
                         ),
                         inputFormatters: [
                           LengthLimitingTextInputFormatter(
@@ -139,6 +100,28 @@ class PhoneAuthentication extends StatelessWidget {
                           ),
                           FilteringTextInputFormatter.digitsOnly,
                         ],
+                        onChanged: (newStr) => {
+                          phoneAuthenticationController
+                              .onPhoneNumberTextChanged()
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0, top: 10),
+                      child: Obx(
+                        () => Visibility(
+                          visible: phoneAuthenticationController
+                                  .phoneNumberTextFieldError
+                                  .value
+                                  ?.isNotEmpty ==
+                              true,
+                          child: Text(
+                            phoneAuthenticationController
+                                    .phoneNumberTextFieldError.value ??
+                                '',
+                            style: CocoTextStyles.errorMsgTextStyle,
+                          ),
+                        ),
                       ),
                     ),
                   ],
