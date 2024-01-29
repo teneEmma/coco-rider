@@ -1,4 +1,5 @@
 import 'package:coco_rider/constants/coco_colors.dart';
+import 'package:coco_rider/constants/internalization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -44,13 +45,14 @@ class CocoButton extends StatelessWidget {
             ),
           CocoButtonState.onSuccess => _ButtonContent(
               color: CocoColors.keySuccess,
-              textToShow: successStateText ?? 'Success',
+              textToShow:
+                  successStateText ?? InternalizationKeys.successText.tr,
               onValidate: () => {},
               textToShowColor: textColor,
             ),
           CocoButtonState.onError => _ButtonContent(
               color: CocoColors.keyError,
-              textToShow: errorStateText ?? 'Error',
+              textToShow: errorStateText ?? InternalizationKeys.errorText.tr,
               onValidate: () => null,
               textToShowColor: textColor,
             ),
