@@ -17,7 +17,9 @@ class PhoneAuthentication extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final phoneAuthenticationController = PhoneAuthenticationController();
+    Get.put(PhoneAuthenticationController());
+    final PhoneAuthenticationController phoneAuthenticationController =
+        Get.find();
 
     return Scaffold(
         extendBodyBehindAppBar: true,
@@ -25,11 +27,12 @@ class PhoneAuthentication extends StatelessWidget {
           toolbarHeight: 70,
           elevation: 0,
           title: Center(
-              child: Image.asset(
-            Get.isDarkMode
-                ? ImageKeys.keyLogoImageWithoutBGGreen
-                : ImageKeys.keyLogoImageWithoutBGDark,
-          )),
+            child: Image.asset(
+              Get.isDarkMode
+                  ? ImageKeys.keyLogoImageWithoutBGGreen
+                  : ImageKeys.keyLogoImageWithoutBGDark,
+            ),
+          ),
           flexibleSpace: ClipRect(
             child: BackdropFilter(
               filter: ImageFilter.blur(
