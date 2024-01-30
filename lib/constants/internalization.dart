@@ -35,6 +35,8 @@ class InternalizationKeys {
   static const enterOTPCodeText = 'enterOTPCodeText';
   static const nextText = 'nextText';
   static const prefixForPhoneNumberTextField = '+237';
+  static const defaultTestPhoneNumber = '679001122';
+  static const defaultTestVerificationId = 'ABC123XYZ';
   static const hintForPhoneNumberTextField = '000 000 000';
   static const hintForOTPDigitTextField = '0';
   static const errorNonDigitInNumber = 'errorNonDigitInNumber';
