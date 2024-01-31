@@ -1,9 +1,9 @@
 enum AuthenticationResponse {
   /// When the authentication process was successful.
-  successful,
+  verificationSuccessful,
 
-  /// when the authentication process was a failure.
-  failed,
+  /// Response sent when the authentication process was a failure.
+  verificationFailed,
 
   /// This represents the absence of a response.
   /// This is mainly the initial state.
