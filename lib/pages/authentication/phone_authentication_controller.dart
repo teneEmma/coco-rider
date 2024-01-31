@@ -1,15 +1,17 @@
 import 'package:coco_rider/common/navigation/routes.dart';
+import 'package:coco_rider/common/utilities/utility_functions.dart';
 import 'package:coco_rider/common/widgets/coco_button.dart';
 import 'package:coco_rider/constants/internalization.dart';
 import 'package:coco_rider/pages/authentication/phone_authentication.dart';
-import 'package:coco_rider/services/authentication_response.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:coco_rider/services/authentication/auth.dart';
+import 'package:coco_rider/services/authentication/authentication_response.dart';
+import 'package:coco_rider/services/authentication/base_authentication.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class PhoneAuthenticationController extends GetxController {
-  // Todo: To be kept in Auth class.
-  late String? authVerificationCode = null;
+  /// Error messages from network requests to be displayed by a snackBar.
+  final RxString errorMessage = ''.obs;
 
   /// Text controller for the textField in [PhoneAuthentication].
   final phoneNumberTextController = TextEditingController();
@@ -21,68 +23,61 @@ class PhoneAuthenticationController extends GetxController {
   final Rx<CocoButtonState> buttonState = CocoButtonState.initialState.obs;
 
   /// Callback function to authenticate a user.
-  bool _onValidate() => RegExp(r'^6[7895][0-9]{7}$')
+  bool _onValidatePhoneNumber() => RegExp(r'^6[7895][0-9]{7}$')
       .hasMatch(removeSpacesInNumber(phoneNumberTextController.text));
 
-  Future<void> authenticateUser() async {
-    if (!_onValidate()) {
+  @override
+  void onInit() {
+    errorMessage.listen((msg) {
+      UtilityFunctions.showErrorSnackBar(msg);
+    });
+    super.onInit();
+  }
+
+  Future<void> authenticateUserWithPhoneNumber(Auth auth) async {
+    if (!_onValidatePhoneNumber()) {
       phoneNumberTextFieldError.value =
           InternalizationKeys.errorFormatPhoneNumber.tr;
       return;
     }
     phoneNumberTextFieldError.value = '';
-    print('👉👉👉 authentication started 👈👈👈');
     await setButtonState(CocoButtonState.onLoading);
 
-    // TODO: All these auth stuffs should be kept in an appSpecific Class called Auth.
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: addCountryCodeToPhoneNumber(phoneNumberTextController.text),
-      verificationCompleted: (phoneAuthCredential) {
-        print('👍 verification completed$phoneAuthCredential');
+    PhoneNumberAuthenticationParameter param =
+        PhoneNumberAuthenticationParameter(
+      phoneNumber: UtilityFunctions.addCountryCodeToPhoneNumber(
+          phoneNumberTextController.text),
+      onVerificationCompleted: () => setButtonState(CocoButtonState.onSuccess),
+      onVerificationFailed: (error) {
+        UtilityFunctions.debugPrint('IT HAS BEEN CALLED HERE');
+        updateErrorMessage(error);
+        setButtonState(CocoButtonState.onError);
+      },
+      onVerificationCodeSent: () {
         setButtonState(CocoButtonState.onSuccess);
+        Get.toNamed(
+          CocoRoutes.keyOTPVerificationCode,
+          arguments: UtilityFunctions.addCountryCodeToPhoneNumber(
+              phoneNumberTextController.text),
+        );
       },
-      verificationFailed: (authException) {
-        print('🚫 verification failed $authException');
-        switch (authException.code) {
-          case 'network-request-failed':
-            // Todo: Show snackbar to tell user there is no internet connection,
-            setButtonState(CocoButtonState.initialState);
-          default:
-            setButtonState(CocoButtonState.onError);
-        }
-      },
-      codeSent: (verifId, token) {
-        print('📲 code sent $verifId && $token');
-        setButtonState(CocoButtonState.onSuccess);
-        authVerificationCode = verifId;
-        Get.toNamed(CocoRoutes.keyOTPVerificationCode);
-      },
-      codeAutoRetrievalTimeout: (verifId) {},
+      onVerificationAutoRetrievalTimeout: () =>
+          updateErrorMessage(InternalizationKeys.errorAutoRetrievalTimeOut.tr),
     );
+    final result = await auth.authenticateWithPhoneNumber(param);
+    if (result == AuthenticationResponse.verificationFailed) {
+      updateErrorMessage(InternalizationKeys.errorOccurred.tr);
+    }
   }
 
-  //TODO: This function should equally ke kept in the Auth Class.
-  Future<AuthenticationResponse> authenticateWithCredentials(
-      String codeEntered) async {
-    if (authVerificationCode == null) {
-      return AuthenticationResponse.failed;
+  /// Method which updates the error message depending on the new value
+  /// which is to be assigned.
+  void updateErrorMessage(String newValue) {
+    if (newValue == errorMessage.value) {
+      errorMessage.refresh();
+      return;
     }
-    PhoneAuthCredential phoneAuthCredential = PhoneAuthProvider.credential(
-      verificationId: authVerificationCode ?? '',
-      smsCode: codeEntered,
-    );
-
-    try {
-      final value =
-          await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
-      return (value.user?.uid != null)
-          ? AuthenticationResponse.successful
-          : AuthenticationResponse.failed;
-    } catch (e) {
-      print('\t\t\tException in phone_authentication_controller.dart');
-      print('😓😓😓\n${e}');
-      return AuthenticationResponse.failed;
-    }
+    errorMessage.value = newValue;
   }
 
   Future<void> setButtonState(
@@ -98,9 +93,6 @@ class PhoneAuthenticationController extends GetxController {
       () => buttonState.value = nextBtnState,
     );
   }
-
-  String addCountryCodeToPhoneNumber(String phoneNumber) =>
-      '${InternalizationKeys.prefixForPhoneNumberTextField}$phoneNumber';
 
   String removeSpacesInNumber(String number) {
     return number.removeAllWhitespace;
