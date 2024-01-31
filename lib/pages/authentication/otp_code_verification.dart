@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:coco_rider/pages/authentication/phone_authentication_controller.dart';
-import 'package:coco_rider/services/authentication_response.dart';
+import 'package:coco_rider/services/authentication/auth.dart';
+import 'package:coco_rider/services/authentication/authentication_response.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -19,6 +19,10 @@ class OTPCodeVerification extends StatelessWidget {
     Get.put(OTPCodeVerificationController());
     final OTPCodeVerificationController otpCodeVerificationController =
         Get.find();
+    final Auth auth = Get.find();
+    if (otpCodeVerificationController.phoneNumber == null) {
+      Get.back();
+    }
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -68,8 +72,8 @@ class OTPCodeVerification extends StatelessWidget {
                               .focusNodeForDigit0.value,
                           textController: otpCodeVerificationController
                               .otpTextControllerDigit0,
-                          onTextChanged: (value) =>
-                              onTextChanged(context, value),
+                          onTextChanged: (value) => onTextChanged(context,
+                              value, otpCodeVerificationController, auth),
                           authResponse: otpCodeVerificationController
                               .otpAuthResponseState.value,
                         ),
@@ -78,8 +82,8 @@ class OTPCodeVerification extends StatelessWidget {
                               .focusNodeForDigit1.value,
                           textController: otpCodeVerificationController
                               .otpTextControllerDigit1,
-                          onTextChanged: (value) =>
-                              onTextChanged(context, value),
+                          onTextChanged: (value) => onTextChanged(context,
+                              value, otpCodeVerificationController, auth),
                           authResponse: otpCodeVerificationController
                               .otpAuthResponseState.value,
                         ),
@@ -88,8 +92,8 @@ class OTPCodeVerification extends StatelessWidget {
                               .focusNodeForDigit2.value,
                           textController: otpCodeVerificationController
                               .otpTextControllerDigit2,
-                          onTextChanged: (value) =>
-                              onTextChanged(context, value),
+                          onTextChanged: (value) => onTextChanged(context,
+                              value, otpCodeVerificationController, auth),
                           authResponse: otpCodeVerificationController
                               .otpAuthResponseState.value,
                         ),
@@ -98,8 +102,8 @@ class OTPCodeVerification extends StatelessWidget {
                               .focusNodeForDigit3.value,
                           textController: otpCodeVerificationController
                               .otpTextControllerDigit3,
-                          onTextChanged: (value) =>
-                              onTextChanged(context, value),
+                          onTextChanged: (value) => onTextChanged(context,
+                              value, otpCodeVerificationController, auth),
                           authResponse: otpCodeVerificationController
                               .otpAuthResponseState.value,
                         ),
@@ -108,8 +112,8 @@ class OTPCodeVerification extends StatelessWidget {
                               .focusNodeForDigit4.value,
                           textController: otpCodeVerificationController
                               .otpTextControllerDigit4,
-                          onTextChanged: (value) =>
-                              onTextChanged(context, value),
+                          onTextChanged: (value) => onTextChanged(context,
+                              value, otpCodeVerificationController, auth),
                           authResponse: otpCodeVerificationController
                               .otpAuthResponseState.value,
                         ),
@@ -118,8 +122,8 @@ class OTPCodeVerification extends StatelessWidget {
                               .focusNodeForDigit5.value,
                           textController: otpCodeVerificationController
                               .otpTextControllerDigit5,
-                          onTextChanged: (value) => onTextChanged(
-                              context, value,
+                          onTextChanged: (value) => onTextChanged(context,
+                              value, otpCodeVerificationController, auth,
                               isLastTextField: true),
                           authResponse: otpCodeVerificationController
                               .otpAuthResponseState.value,
@@ -136,7 +140,7 @@ class OTPCodeVerification extends StatelessWidget {
                         sigmaY: 3,
                         sigmaX: 3,
                       ),
-                      child: CircularProgressIndicator(),
+                      child: const CircularProgressIndicator(),
                     ),
                   ),
                 )
@@ -151,31 +155,14 @@ class OTPCodeVerification extends StatelessWidget {
   // TODO: Replace this logic with a button.
   Future<void> onTextChanged(
     BuildContext context,
-    String value, {
+    String value,
+    OTPCodeVerificationController controller,
+    Auth auth, {
     bool isLastTextField = false,
   }) async {
     final OTPCodeVerificationController controller = Get.find();
     if (isLastTextField) {
-      controller.isLoading.value = true;
-      final otpCodeEntered = controller.getOTPCode();
-      if (!controller.validateOTPCode()) {
-        print('🔓🔓🔓 Validation for OTP code = ${otpCodeEntered} Failed.');
-        return;
-      }
-      print('🔓🔓🔓 OTP code = ${otpCodeEntered}');
-      try {
-        controller.otpAuthResponseState.value =
-            await Get.find<PhoneAuthenticationController>()
-                .authenticateWithCredentials(otpCodeEntered);
-        print(
-            '🔓🔓🔓 OTP Authentication result = \n${controller.otpAuthResponseState.value}');
-      } catch (e) {
-        controller.otpAuthResponseState.value = AuthenticationResponse.failed;
-        print('\t\t\tException in phone_authentication_controller.dart');
-        print('😓😓😓\n${e}');
-      }
-
-      controller.isLoading.value = false;
+      controller.onTextChanged(value, auth);
       return;
     }
 
@@ -221,7 +208,7 @@ class OTPDigitTextField extends StatelessWidget {
             borderRadius: const BorderRadius.all(Radius.circular(20.0)),
             borderSide: BorderSide(
               width: 3,
-              color: authResponse == AuthenticationResponse.failed
+              color: authResponse == AuthenticationResponse.verificationFailed
                   ? CocoColors.keyError
                   : CocoColors.keyPrimary,
             ),
@@ -230,15 +217,13 @@ class OTPDigitTextField extends StatelessWidget {
             borderRadius: const BorderRadius.all(Radius.circular(20.0)),
             borderSide: BorderSide(
               width: 3,
-              color: (authResponse == AuthenticationResponse.failed
+              color: (authResponse == AuthenticationResponse.verificationFailed
                       ? CocoColors.keyError
                       : CocoColors.keyPrimary)
                   .withAlpha(50),
             ),
           ),
-          fillColor: focusNode.hasFocus
-              ? CocoColors.keyGrey.withOpacity(0.2)
-              : CocoColors.keyWhite,
+          fillColor: getFillColor(context, focusNode.hasFocus),
           hintText: InternalizationKeys.hintForOTPDigitTextField,
         ),
         inputFormatters: [
@@ -248,6 +233,12 @@ class OTPDigitTextField extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Color getFillColor(BuildContext context, bool hasFocus) {
+    final focusedColor = CocoColors.keyGrey.withOpacity(0.3);
+    final noFocusColor = Theme.of(context).colorScheme.background;
+    return hasFocus ? focusedColor : noFocusColor;
   }
 }
 
