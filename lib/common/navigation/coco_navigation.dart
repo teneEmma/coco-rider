@@ -12,6 +12,7 @@ class CocoNavigation {
     GetPage(
       name: CocoRoutes.keyOTPVerificationCode,
       page: () => const OTPCodeVerification(),
+      arguments: String,
     ),
   ];
 }
