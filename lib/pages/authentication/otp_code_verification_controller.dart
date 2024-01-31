@@ -1,37 +1,57 @@
-import 'package:coco_rider/services/authentication_response.dart';
+import 'package:coco_rider/common/utilities/utility_functions.dart';
+import 'package:coco_rider/services/authentication/auth.dart';
+import 'package:coco_rider/services/authentication/authentication_response.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class OTPCodeVerificationController extends GetxController {
   @override
   void onInit() {
+    phoneNumber = Get.arguments;
+
+    errorMessage.listen((msg) {
+      UtilityFunctions.showErrorSnackBar(msg);
+    });
+
     focusNodeForDigit0.value.addListener(() {
-      print('🤯 Listener for digit 0 called.');
+      UtilityFunctions.debugPrint('Listener for digit 0 called.',
+          leadingIcons: '🤯');
       focusNodeForDigit0.refresh();
     });
     focusNodeForDigit1.value.addListener(() {
-      print('🤯 Listener for digit 1 called.');
+      UtilityFunctions.debugPrint('Listener for digit 1 called.',
+          leadingIcons: '🤯');
       focusNodeForDigit1.refresh();
     });
     focusNodeForDigit2.value.addListener(() {
-      print('🤯 Listener for digit 2 called.');
+      UtilityFunctions.debugPrint('Listener for digit 2 called.',
+          leadingIcons: '🤯');
       focusNodeForDigit2.refresh();
     });
     focusNodeForDigit3.value.addListener(() {
-      print('🤯 Listener for digit 3 called.');
+      UtilityFunctions.debugPrint('Listener for digit 3 called.',
+          leadingIcons: '🤯');
       focusNodeForDigit3.refresh();
     });
     focusNodeForDigit4.value.addListener(() {
-      print('🤯 Listener for digit 4 called.');
+      UtilityFunctions.debugPrint('Listener for digit 4 called.',
+          leadingIcons: '🤯');
       focusNodeForDigit4.refresh();
     });
     focusNodeForDigit5.value.addListener(() {
-      print('🤯 Listener for digit 5 called.');
+      UtilityFunctions.debugPrint('Listener for digit 5 called.',
+          leadingIcons: '🤯');
       focusNodeForDigit5.refresh();
     });
 
     super.onInit();
   }
+
+  /// Error messages from network requests to be displayed by a snackBar.
+  final RxString errorMessage = ''.obs;
+
+  /// The phone number against which the otp is being verified.
+  late final String? phoneNumber;
 
   /// The value which determines if the otp code entered was correct.
   Rx<AuthenticationResponse> otpAuthResponseState =
@@ -78,10 +98,46 @@ class OTPCodeVerificationController extends GetxController {
       '${otpTextControllerDigit3.text}${otpTextControllerDigit4.text}${otpTextControllerDigit5.text}';
 
   void initAuthenticationResponseState() {
-    if (otpAuthResponseState.value == AuthenticationResponse.failed) {
+    if (otpAuthResponseState.value ==
+        AuthenticationResponse.verificationFailed) {
       otpAuthResponseState.value = AuthenticationResponse.init;
     }
   }
 
   bool validateOTPCode() => RegExp(r'^\d{6}$').hasMatch(getOTPCode());
+
+  // TODO: Replace this logic with a button.
+  Future<void> onTextChanged(
+    String value,
+    Auth auth, {
+    bool isLastTextField = false,
+  }) async {
+    isLoading.value = true;
+    final otpCodeEntered = getOTPCode();
+    if (!validateOTPCode()) {
+      UtilityFunctions.debugPrint(
+          'Validation for OTP code = $otpCodeEntered Failed.',
+          leadingIcons: '🔓🔓🔓');
+      return;
+    }
+    UtilityFunctions.debugPrint('OTP code = $otpCodeEntered',
+        leadingIcons: '🔓🔓🔓');
+    final String phoneNumb = phoneNumber ?? '';
+    otpAuthResponseState.value = await auth.authenticateWithOTPCode(
+      phoneNumb,
+      getOTPCode(),
+      onVerificationCompleted: () {
+        UtilityFunctions.debugPrint('OTP Authentication succeeded',
+            leadingIcons: '🔓🔓🔓');
+      },
+      onVerificationFailed: (error) {
+        errorMessage.value = error;
+        UtilityFunctions.debugPrint(
+            'OTP Authentication failed with error: $error',
+            leadingIcons: '🔓🔓🔓');
+      },
+    );
+
+    isLoading.value = false;
+  }
 }
