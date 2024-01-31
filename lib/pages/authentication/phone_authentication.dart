@@ -7,6 +7,7 @@ import 'package:coco_rider/constants/coco_constants.dart';
 import 'package:coco_rider/constants/image_keys.dart';
 import 'package:coco_rider/constants/internalization.dart';
 import 'package:coco_rider/pages/authentication/phone_authentication_controller.dart';
+import 'package:coco_rider/services/authentication/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -20,6 +21,15 @@ class PhoneAuthentication extends StatelessWidget {
     Get.put(PhoneAuthenticationController());
     final PhoneAuthenticationController phoneAuthenticationController =
         Get.find();
+    final Auth auth = Get.find();
+    // ever(
+    //     phoneAuthenticationController.errorMessage,
+    //     (msg) => ScaffoldMessenger.of(context).showSnackBar(
+    //           SnackBar(
+    //             content: Text(msg),
+    //             dismissDirection: DismissDirection.horizontal,
+    //           ),
+    //         ));
 
     return Scaffold(
         extendBodyBehindAppBar: true,
@@ -88,7 +98,7 @@ class PhoneAuthentication extends StatelessWidget {
                                 const SizedBox(width: 5),
                                 Text(
                                   InternalizationKeys
-                                      .prefixForPhoneNumberTextField,
+                                      .countryCodeForPhoneNumberTextField,
                                   style: Theme.of(context).textTheme.bodyLarge,
                                 ),
                               ],
@@ -131,8 +141,8 @@ class PhoneAuthentication extends StatelessWidget {
                 ),
                 CocoButton(
                   buttonState: phoneAuthenticationController.buttonState,
-                  onValidate: () =>
-                      phoneAuthenticationController.authenticateUser(),
+                  onValidate: () => phoneAuthenticationController
+                      .authenticateUserWithPhoneNumber(auth),
                   normalStateText: InternalizationKeys.nextText.tr,
                 )
               ],
