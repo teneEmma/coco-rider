@@ -2,6 +2,8 @@ import 'package:coco_rider/common/navigation/coco_navigation.dart';
 import 'package:coco_rider/common/theme/coco_theme.dart';
 import 'package:coco_rider/constants/internalization.dart';
 import 'package:coco_rider/pages/authentication/phone_authentication.dart';
+import 'package:coco_rider/services/authentication/auth.dart';
+import 'package:coco_rider/services/authentication/base_authentication.dart';
 import 'package:coco_rider/services/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +14,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  Get.put(Auth(AuthType.firebase));
+
   runApp(const MyApp());
 }
 
