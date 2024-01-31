@@ -10,4 +10,5 @@ class CocoColors {
   static const Color keyBlack = Color(0xFF000000);
   static const Color keySuccess = Color(0xFF067D17);
   static const Color keyGrey = Color(0xFF9E9E9E);
+  static const Color keyPaleWhite = Color(0xFFF5F3F3);
 }
