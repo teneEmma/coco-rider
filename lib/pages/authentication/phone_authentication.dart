@@ -22,19 +22,11 @@ class PhoneAuthentication extends StatelessWidget {
     final PhoneAuthenticationController phoneAuthenticationController =
         Get.find();
     final Auth auth = Get.find();
-    // ever(
-    //     phoneAuthenticationController.errorMessage,
-    //     (msg) => ScaffoldMessenger.of(context).showSnackBar(
-    //           SnackBar(
-    //             content: Text(msg),
-    //             dismissDirection: DismissDirection.horizontal,
-    //           ),
-    //         ));
 
     return Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          toolbarHeight: 70,
+          toolbarHeight: CocoConstants.defaultSmallScreenAppBarHeight,
           elevation: 0,
           title: Center(
             child: Image.asset(
@@ -73,8 +65,10 @@ class PhoneAuthentication extends StatelessWidget {
                       ),
                     ),
                     ConstrainedBox(
-                      constraints:
-                          const BoxConstraints(maxWidth: 380, maxHeight: 70),
+                      constraints: const BoxConstraints(
+                        maxWidth: CocoConstants.cocoTextFieldDefaultWidth,
+                        maxHeight: CocoConstants.cocoTextFieldDefaultHeight,
+                      ),
                       child: TextField(
                         controller: phoneAuthenticationController
                             .phoneNumberTextController,
