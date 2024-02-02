@@ -53,6 +53,10 @@ class CocoTheme {
       selectionColor: CocoColors.keyPrimary.withAlpha(75),
     ),
     textTheme: const TextTheme(
+      headlineLarge: TextStyle(
+        color: CocoColors.keyBlack,
+        fontSize: 30,
+      ),
       headlineMedium: TextStyle(
         color: CocoColors.keyBlack,
         fontSize: 20,
@@ -119,6 +123,10 @@ class CocoTheme {
       selectionColor: CocoColors.keyPrimary.withAlpha(75),
     ),
     textTheme: const TextTheme(
+      headlineLarge: TextStyle(
+        color: CocoColors.keyBlack,
+        fontSize: 30,
+      ),
       headlineMedium: TextStyle(
         color: CocoColors.keyWhite,
         fontSize: 20,
