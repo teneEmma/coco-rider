@@ -29,11 +29,34 @@ class CocoTheme {
         color: CocoColors.keyBlack.withAlpha(80),
       ),
     ),
+    navigationRailTheme: NavigationRailThemeData(
+      backgroundColor: CocoColors.keyWhite.withAlpha(150),
+      indicatorColor: CocoColors.keyPrimary.withAlpha(150),
+      useIndicator: true,
+      labelType: NavigationRailLabelType.all,
+      unselectedLabelTextStyle: const TextStyle(
+        color: CocoColors.keyGrey,
+        fontSize: 14,
+      ),
+      selectedIconTheme: const IconThemeData(
+        color: CocoColors.keyBlack,
+      ),
+      selectedLabelTextStyle: const TextStyle(color: CocoColors.keyBlack),
+    ),
+    appBarTheme: const AppBarTheme(
+      color: CocoColors.keyWhite,
+      toolbarHeight: CocoAppConstants.defaultSmallScreenAppBarHeight,
+      elevation: 0,
+    ),
     textSelectionTheme: TextSelectionThemeData(
       cursorColor: CocoColors.keyPrimary,
       selectionColor: CocoColors.keyPrimary.withAlpha(75),
     ),
     textTheme: const TextTheme(
+      headlineLarge: TextStyle(
+        color: CocoColors.keyBlack,
+        fontSize: 30,
+      ),
       headlineMedium: TextStyle(
         color: CocoColors.keyBlack,
         fontSize: 20,
@@ -78,11 +101,32 @@ class CocoTheme {
         color: CocoColors.keyWhite.withAlpha(150),
       ),
     ),
+    navigationRailTheme: NavigationRailThemeData(
+      backgroundColor: CocoColors.keyBlack,
+      indicatorColor: CocoColors.keyPrimary.withAlpha(150),
+      useIndicator: true,
+      labelType: NavigationRailLabelType.all,
+      unselectedLabelTextStyle: const TextStyle(
+        color: CocoColors.keyGrey,
+        fontSize: 14,
+      ),
+      selectedIconTheme: const IconThemeData(
+        color: CocoColors.keyWhite,
+      ),
+      selectedLabelTextStyle: const TextStyle(color: CocoColors.keyBlack),
+    ),
+    appBarTheme: const AppBarTheme(
+      color: CocoColors.keyWhite,
+    ),
     textSelectionTheme: TextSelectionThemeData(
       cursorColor: CocoColors.keyPrimary,
       selectionColor: CocoColors.keyPrimary.withAlpha(75),
     ),
     textTheme: const TextTheme(
+      headlineLarge: TextStyle(
+        color: CocoColors.keyBlack,
+        fontSize: 30,
+      ),
       headlineMedium: TextStyle(
         color: CocoColors.keyWhite,
         fontSize: 20,
