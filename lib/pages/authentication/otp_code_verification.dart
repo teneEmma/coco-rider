@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:coco_rider/constants/coco_constants.dart';
 import 'package:coco_rider/services/authentication/auth.dart';
 import 'package:coco_rider/services/authentication/authentication_response.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,7 @@ class OTPCodeVerification extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        toolbarHeight: 70,
+        toolbarHeight: CocoConstants.defaultSmallScreenAppBarHeight,
         elevation: 0,
         title: Center(
           child: Image.asset(

@@ -1,6 +1,6 @@
+import 'package:coco_rider/constants/coco_colors.dart';
+import 'package:coco_rider/constants/coco_constants.dart';
 import 'package:flutter/material.dart';
-
-import '../../constants/coco_colors.dart';
 
 class CocoTheme {
   static ThemeData lightTheme = ThemeData(
@@ -45,7 +45,7 @@ class CocoTheme {
     ),
     appBarTheme: const AppBarTheme(
       color: CocoColors.keyWhite,
-      toolbarHeight: CocoAppConstants.defaultSmallScreenAppBarHeight,
+      toolbarHeight: CocoConstants.defaultSmallScreenAppBarHeight,
       elevation: 0,
     ),
     textSelectionTheme: TextSelectionThemeData(

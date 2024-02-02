@@ -2,8 +2,8 @@ import 'dart:ui';
 
 import 'package:coco_rider/common/utilities/utility_functions.dart';
 import 'package:coco_rider/common/widgets/responsive_layout_controller.dart';
-import 'package:coco_rider/constants/coco_app_constants.dart';
 import 'package:coco_rider/constants/coco_colors.dart';
+import 'package:coco_rider/constants/coco_constants.dart';
 import 'package:coco_rider/constants/image_keys.dart';
 import 'package:coco_rider/constants/internalization.dart';
 import 'package:flutter/foundation.dart';
@@ -96,13 +96,12 @@ class ResponsiveLayout extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size.width;
 
     final screenSkeleton = switch (screenSize) {
-      <= CocoAppConstants.smallScreenWidth => _ScreenSkeleton(
+      <= CocoConstants.smallScreenWidth => _ScreenSkeleton(
           appBar: shouldShowAppbar ? smallScreenAppBarWidget : null,
           content: smallScreenWidget,
           shouldShowFooter: shouldShowFooter && kIsWeb,
         ),
-      > CocoAppConstants.smallScreenWidth &&
-            < CocoAppConstants.mediumScreenWidth =>
+      > CocoConstants.smallScreenWidth && < CocoConstants.mediumScreenWidth =>
         _ScreenSkeleton(
           appBar: shouldShowAppbar ? mediumAndLargeScreenAppBarWidget : null,
           content: mediumScreenWidget,
@@ -120,7 +119,7 @@ class ResponsiveLayout extends StatelessWidget {
       resizeToAvoidBottomInset: true,
       appBar: screenSkeleton.appBar,
       bottomNavigationBar:
-          screenSize <= CocoAppConstants.smallScreenWidth && shouldShowNavbar
+          screenSize <= CocoConstants.smallScreenWidth && shouldShowNavbar
               ? navigationBarWidget
               : null,
       body: screenSkeleton,
