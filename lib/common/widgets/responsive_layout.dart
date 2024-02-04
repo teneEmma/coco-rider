@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:coco_rider/common/utilities/utility_functions.dart';
 import 'package:coco_rider/common/widgets/responsive_layout_controller.dart';
 import 'package:coco_rider/constants/coco_colors.dart';
 import 'package:coco_rider/constants/coco_constants.dart';
@@ -283,10 +282,8 @@ class DefaultBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ResponsiveLayoutController controller = Get.find();
-    UtilityFunctions.debugPrint('HEIGHT: ${context.height}',
-        leadingIcons: '😡😡😡');
     return Obx(
-      // TODO: Great a theme for this[NavigationBar].
+      // TODO: Create a theme for this[NavigationBar].
       () => NavigationBar(
         backgroundColor: Theme.of(context).colorScheme.background,
         selectedIndex: controller.navigationBarSelectedIndex.value,
