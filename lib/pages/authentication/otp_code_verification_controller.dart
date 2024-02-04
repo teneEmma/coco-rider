@@ -1,3 +1,4 @@
+import 'package:coco_rider/common/navigation/routes.dart';
 import 'package:coco_rider/common/utilities/utility_functions.dart';
 import 'package:coco_rider/services/authentication/auth.dart';
 import 'package:coco_rider/services/authentication/authentication_response.dart';
@@ -107,6 +108,7 @@ class OTPCodeVerificationController extends GetxController {
   bool validateOTPCode() => RegExp(r'^\d{6}$').hasMatch(getOTPCode());
 
   // TODO: Replace this logic with a button.
+  // TODO: Show proper error messages for error messages sent by Firebase.
   Future<void> onTextChanged(
     String value,
     Auth auth, {
@@ -129,6 +131,7 @@ class OTPCodeVerificationController extends GetxController {
       onVerificationCompleted: () {
         UtilityFunctions.debugPrint('OTP Authentication succeeded',
             leadingIcons: '🔓🔓🔓');
+        Get.offAllNamed(CocoRoutes.keyHomePage);
       },
       onVerificationFailed: (error) {
         errorMessage.value = error;

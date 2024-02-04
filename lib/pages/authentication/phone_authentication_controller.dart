@@ -56,7 +56,7 @@ class PhoneAuthenticationController extends GetxController {
       onVerificationCodeSent: () {
         setButtonState(CocoButtonState.onSuccess);
         Get.toNamed(
-          CocoRoutes.keyOTPVerificationCode,
+          CocoRoutes.keyOTPVerificationCodePage,
           arguments: UtilityFunctions.addCountryCodeToPhoneNumber(
               phoneNumberTextController.text),
         );
