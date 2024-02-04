@@ -1,7 +1,7 @@
 import 'package:coco_rider/common/navigation/coco_navigation.dart';
 import 'package:coco_rider/common/theme/coco_theme.dart';
 import 'package:coco_rider/constants/internalization.dart';
-import 'package:coco_rider/pages/authentication/phone_authentication.dart';
+import 'package:coco_rider/pages/home_page/home_page.dart';
 import 'package:coco_rider/services/authentication/auth.dart';
 import 'package:coco_rider/services/authentication/base_authentication.dart';
 import 'package:coco_rider/services/firebase_options.dart';
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         getPages: CocoNavigation.pages,
         theme: CocoTheme.lightTheme,
         darkTheme: CocoTheme.darkTheme,
-        home: const PhoneAuthentication(),
+        home: const HomePage(),
       ),
     );
   }
