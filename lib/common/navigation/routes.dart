@@ -1,4 +1,5 @@
 class CocoRoutes {
   static const keyAuthenticationPage = '/authentication';
-  static const keyOTPVerificationCode = '/otpVerificationCade';
+  static const keyOTPVerificationCodePage = '/otpVerificationCadePage';
+  static const keyHomePage = '/keyHomePage';
 }
