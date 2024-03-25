@@ -1,0 +1,1 @@
+This would describe the project structure
