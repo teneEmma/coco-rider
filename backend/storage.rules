@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // If the file provided is an image and if the image has a max size of 1Mb.
+    function isImageOfRightSize() {
+        return if request.resource.size < 1 * 1024 * 1024 
+                    && request.resource.contentType.matches('image/.*');
+    }
+    //Checks if the driver is registered(i.e has an id) and exists in database.
+    function isRegisteredAndValidDriver(driverID){
+      return request.auth.uid == driverID && 
+                firestore.exists(/database/$(database)/documents/drivers/$(request.auth.uid))
+    }
+
+    match /drivers/{driverID} {
+      match /profilePicture {
+        // Everyone can access a driver's profile picture.
+        allow read: if request.auth.uid != null;
+        allow write: if isRegisteredAndValidDriver(driverID) && isImageOfRightSize();
+      }
+      match /carDocuments {
+        // Only drivers can access, add or update their car documents and 
+        //driver related personal information.
+        allow read: if isRegisteredAndValidDriver(driverID);
+        allow write, update: if isRegisteredAndValidDriver(driverID) && isImageOfRightSize();
+      }
+    }
+  }
+}
