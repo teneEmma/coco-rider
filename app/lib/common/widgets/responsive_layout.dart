@@ -263,7 +263,7 @@ class DefaultAppNavigationRails extends StatelessWidget {
           NavigationRailDestination(
             icon: const Icon(Icons.message_outlined),
             selectedIcon: const Icon(Icons.message),
-            label: Text(InternalizationKeys.profileTitle.tr),
+            label: Text(InternalizationKeys.inboxTitle.tr),
           ),
           NavigationRailDestination(
             icon: const Icon(Icons.person_2_outlined),
@@ -312,7 +312,7 @@ class DefaultBottomNavigationBar extends StatelessWidget {
           NavigationDestination(
             icon: const Icon(Icons.message_outlined),
             selectedIcon: const Icon(Icons.message),
-            label: InternalizationKeys.profileTitle.tr,
+            label: InternalizationKeys.inboxTitle.tr,
           ),
           NavigationDestination(
             icon: const Icon(Icons.person_2_outlined),

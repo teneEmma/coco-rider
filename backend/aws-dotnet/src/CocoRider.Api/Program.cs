@@ -12,6 +12,7 @@ using CocoRider.Domain.Common;
 using CocoRider.Domain.Verification;
 using CocoRider.Infrastructure;
 using CocoRider.Infrastructure.Persistence;
+using CocoRider.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +31,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<DomainExceptionHandler>();
 builder.Services.AddHealthChecks();
+builder.Services.AddCors();
 
 var app = builder.Build();
 
@@ -41,6 +43,13 @@ if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
 }
 
 app.UseExceptionHandler();
+
+if (app.Environment.IsDevelopment())
+{
+    // Lets the Flutter web build call a local API. In AWS, CORS is handled by API Gateway.
+    app.UseCors(cors => cors.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+}
+
 app.UseStatusCodePages();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -53,6 +62,21 @@ app.MapTripEndpoints();
 app.MapBookingEndpoints();
 app.MapReviewEndpoints();
 app.MapAdminEndpoints();
+
+if (app.Environment.IsDevelopment() && app.Services.GetService<FakeDocumentStorage>() is { } fakeStorage)
+{
+    // Stand-in for the pre-signed S3 URLs when running locally without AWS.
+    app.MapPut("/dev/uploads/{**key}", async (string key, HttpRequest request) =>
+    {
+        using var buffer = new MemoryStream();
+        await request.Body.CopyToAsync(buffer);
+        fakeStorage.Put(key, buffer.ToArray(), request.ContentType ?? "application/octet-stream");
+        return Results.Ok();
+    }).AllowAnonymous();
+    app.MapGet("/dev/uploads/{**key}", (string key) => fakeStorage.Get(key) is { } stored
+        ? Results.File(stored.Bytes, stored.ContentType)
+        : Results.NotFound()).AllowAnonymous();
+}
 
 app.Run();
 

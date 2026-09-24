@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Coco Rider uses the camera to photograph your ID documents and take your verification selfie.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Coco Rider lets you choose photos of your ID documents from your library.</string>
 </dict>
 </plist>

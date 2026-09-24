@@ -16,7 +16,7 @@ Carpooling for Cameroon: private drivers (and clandos) share the cost of interci
 | Infrastructure as code | AWS CDK (TypeScript) – `infra/` |
 | Region | `eu-west-1` (Ireland) – see [Region](#region) |
 | Payments | No money goes through the app yet: the passenger pays the driver (cash, MTN MoMo, Orange Money). The commission owed is recorded on each booking (0% while free) |
-| Old Firebase backend | Kept untouched in `backend/functions` until the app is migrated |
+| Old Firebase backend | The app no longer uses Firebase; `backend/functions` is kept for reference and can be deleted |
 
 ## Architecture
 
@@ -149,7 +149,7 @@ payment method, total, commission) · `reviews` (1–5, one per author per booki
 
 ## Roadmap
 
-1. **Flutter app → new backend**: replace Firebase Auth with Cognito (`amplify_auth_cognito`), call the API.
+1. ~~Flutter app → new backend~~ – done: Cognito sign-in/sign-up by SMS code, profile, documents, search, booking, publishing, my rides, reviews.
 2. ~~Admin dashboard~~ (`web/admin`) and ~~landing page~~ (`web/landing`) – done.
 3. Custom domain (e.g. cocorider.cm) for the websites and the API.
 4. **Push notifications** (booking requests, confirmations) via Firebase Cloud Messaging or SNS mobile push.

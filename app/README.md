@@ -1,9 +1,8 @@
 # **COCO RIDER**: A carpooling app.
 
-Coco rider is a mobile and web app that connects travelers who share similar
-interests and destinations. Whether you are looking for a travel buddy,
-a local guide, or a group tour, Co-Travel can help you find your perfect
-match.
+Coco Rider connects drivers and passengers in Cameroon to share the cost of
+intercity trips and daily commutes. The app talks to the AWS backend in
+`backend/aws-dotnet` (sign-in with Amazon Cognito: phone number + SMS code).
 
 #### Getting Started
 
@@ -13,7 +12,7 @@ your local machine for development and testing purposes.
 #### Prerequisites:
 
 Install the [Flutter SDK](https://flutter.dev/docs/get-started/install)
-(version *3.13.9-stable*) containing dart version *3.1.5*.
+(tested with *3.47 stable*, Dart *3.13*).
 
 #### Code Formatting:
 
@@ -44,18 +43,31 @@ flutter devices
 If none are shown, follow the device-specific instructions on the
 [Install](https://flutter.dev/docs/get-started/install) page for your OS.
 
-Run the app:
+Run the app against the **local API** (see `backend/aws-dotnet/README.md`).
+No SMS is sent: any phone number works with the code `123456`.
 
 ```
-flutter run
+flutter run --dart-define=COCO_API_URL=http://10.0.2.2:5200   # Android emulator
+flutter run --dart-define=COCO_API_URL=http://localhost:5200  # iOS simulator
 ```
+
+Run it against **AWS** with the values printed by `cdk deploy` (`ApiUrl`, `MobileClientId`):
+
+```
+flutter run \
+  --dart-define=COCO_API_URL=https://xxxx.execute-api.eu-west-1.amazonaws.com \
+  --dart-define=COCO_COGNITO_REGION=eu-west-1 \
+  --dart-define=COCO_COGNITO_CLIENT_ID=xxxxxxxx
+```
+
+Tests: `flutter test`.
 
 #### Web (Chrome):
 
 Build and run on chrome:
 
 ```
-flutter run -d chrome
+flutter run -d chrome --dart-define=COCO_API_URL=http://localhost:5200
 ```
 
 ## DEVELOPMENT

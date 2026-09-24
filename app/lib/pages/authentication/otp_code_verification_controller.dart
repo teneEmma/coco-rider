@@ -108,13 +108,11 @@ class OTPCodeVerificationController extends GetxController {
   bool validateOTPCode() => RegExp(r'^\d{6}$').hasMatch(getOTPCode());
 
   // TODO: Replace this logic with a button.
-  // TODO: Show proper error messages for error messages sent by Firebase.
   Future<void> onTextChanged(
     String value,
     Auth auth, {
     bool isLastTextField = false,
   }) async {
-    isLoading.value = true;
     final otpCodeEntered = getOTPCode();
     if (!validateOTPCode()) {
       UtilityFunctions.debugPrint(
@@ -122,6 +120,7 @@ class OTPCodeVerificationController extends GetxController {
           leadingIcons: '🔓🔓🔓');
       return;
     }
+    isLoading.value = true;
     UtilityFunctions.debugPrint('OTP code = $otpCodeEntered',
         leadingIcons: '🔓🔓🔓');
     final String phoneNumb = phoneNumber ?? '';
@@ -131,7 +130,7 @@ class OTPCodeVerificationController extends GetxController {
       onVerificationCompleted: () {
         UtilityFunctions.debugPrint('OTP Authentication succeeded',
             leadingIcons: '🔓🔓🔓');
-        Get.offAllNamed(CocoRoutes.keyHomePage);
+        Get.offAllNamed(CocoRoutes.keyStartPage);
       },
       onVerificationFailed: (error) {
         errorMessage.value = error;

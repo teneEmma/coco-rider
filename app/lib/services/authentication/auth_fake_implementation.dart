@@ -1,6 +1,5 @@
 import 'package:coco_rider/constants/internalization.dart';
 import 'package:coco_rider/services/authentication/authentication_response.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import 'base_authentication.dart';
 
@@ -8,7 +7,7 @@ import 'base_authentication.dart';
 /// should only be used for testing purposes.
 class AuthFakeImplementation implements BaseAuthentication {
   String? _uid;
-  final User? _user;
+  AuthUser? _user;
   final String _testPhoneNumber;
   final String _testSmsCode;
 
@@ -17,7 +16,7 @@ class AuthFakeImplementation implements BaseAuthentication {
     String? uid,
     String? testPhoneNumber,
     String? testSmsCode,
-    User? user,
+    AuthUser? user,
   })  : _uid = uid,
         _user = user,
         _testPhoneNumber =
@@ -25,10 +24,17 @@ class AuthFakeImplementation implements BaseAuthentication {
         _testSmsCode = testSmsCode ?? '123456';
 
   @override
+  Future<bool> restoreSession() async => _user != null;
+
+  @override
+  Future<Map<String, String>> authHeaders() async =>
+      _user == null ? {} : {'X-Dev-User': _user!.uid};
+
+  @override
   Future<AuthenticationResponse> authenticateWithPhoneNumber(
     PhoneNumberAuthenticationParameter param,
   ) async {
-    if (param.phoneNumber == _testPhoneNumber) {
+    if (param.phoneNumber.endsWith(_testPhoneNumber)) {
       param.onVerificationCodeSent();
 
       return AuthenticationResponse.verificationSuccessful;
@@ -45,6 +51,7 @@ class AuthFakeImplementation implements BaseAuthentication {
     required Function(String) onVerificationFailed,
   }) async {
     if (otpCode == _testSmsCode) {
+      _user = AuthUser(uid: _uid ?? 'fake-user', phoneNumber: phoneNumber);
       onVerificationCompleted();
 
       return AuthenticationResponse.verificationSuccessful;
@@ -57,11 +64,12 @@ class AuthFakeImplementation implements BaseAuthentication {
   @override
   Future<void> signOut() async {
     _uid = null;
+    _user = null;
   }
 
   @override
-  String? get uid => _uid;
+  String? get uid => _user?.uid ?? _uid;
 
   @override
-  User? get user => _user;
+  AuthUser? get user => _user;
 }

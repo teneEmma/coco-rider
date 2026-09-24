@@ -25,7 +25,8 @@ public static class DependencyInjection
 
         if (string.Equals(storageSection["Mode"], "Fake", StringComparison.OrdinalIgnoreCase))
         {
-            services.AddSingleton<IDocumentStorage, FakeDocumentStorage>();
+            services.AddSingleton<FakeDocumentStorage>();
+            services.AddSingleton<IDocumentStorage>(sp => sp.GetRequiredService<FakeDocumentStorage>());
             services.AddSingleton<IDocumentChecker, AcceptAllDocumentChecker>();
         }
         else

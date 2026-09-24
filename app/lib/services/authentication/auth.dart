@@ -1,7 +1,6 @@
 import 'package:coco_rider/common/utilities/utility_functions.dart';
 import 'package:coco_rider/services/authentication/authentication_response.dart';
 import 'package:coco_rider/services/authentication/base_authentication.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
 /// The auth class which encompasses and handles everything related with
@@ -23,7 +22,7 @@ class Auth extends GetxController {
     String? uid,
     String? testPhoneNumber,
     String? testSmsCode,
-    User? user,
+    AuthUser? user,
   }) =>
       Auth._(
         BaseAuthentication.fake(
@@ -37,11 +36,14 @@ class Auth extends GetxController {
   /// Returns the user's phone number.
   Rx<String?>? get userPhoneNumber => _baseAuthentication.user?.phoneNumber.obs;
 
-  /// Returns the user's first name.
-  Rx<String?>? get userFirstName => _baseAuthentication.user?.displayName.obs;
-
   /// Checks if the user is logged in.
   RxBool get userIsLogged => (_baseAuthentication.user != null).obs;
+
+  /// Restores the session saved on the device. Returns true when signed in.
+  Future<bool> restoreSession() => _baseAuthentication.restoreSession();
+
+  /// Headers that authenticate a call to the Coco Rider API.
+  Future<Map<String, String>> authHeaders() => _baseAuthentication.authHeaders();
 
   /// Returns the User Id.
   Rx<String?> get userId => _baseAuthentication.uid.obs;
