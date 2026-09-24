@@ -18,6 +18,9 @@ public enum BookingStatus
 
     Completed,
     NoShow,
+
+    /// <summary>The driver never answered the request before departure.</summary>
+    Expired,
 }
 
 /// <summary>How the passenger will pay the driver. The app does not collect money in the MVP.</summary>
@@ -131,13 +134,24 @@ public sealed class Booking
             Move(BookingStatus.TripCancelled, now);
     }
 
-    /// <summary>Called for every booking when the driver completes the trip; pending requests just lapse.</summary>
+    /// <summary>Called for every booking when the trip is completed; unanswered requests expire.</summary>
     public void CompleteWithTrip(DateTimeOffset now)
     {
         if (Status == BookingStatus.Confirmed)
             Move(BookingStatus.Completed, now);
         else if (Status == BookingStatus.Pending)
-            Move(BookingStatus.RejectedByDriver, now);
+            Move(BookingStatus.Expired, now);
+    }
+
+    /// <summary>A request the driver did not answer before departure stops holding seats.</summary>
+    public void ExpireIfUnanswered(Trip trip, DateTimeOffset now)
+    {
+        EnsureTrip(trip);
+        if (Status != BookingStatus.Pending || !trip.HasDeparted(now))
+            return;
+
+        trip.ReleaseSeats(Seats);
+        Move(BookingStatus.Expired, now);
     }
 
     /// <summary>The driver reports that the passenger did not show up. The caller records a strike.</summary>

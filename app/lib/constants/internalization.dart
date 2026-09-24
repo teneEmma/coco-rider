@@ -174,6 +174,7 @@ class AppStrings {
     'bookingStatus.tripCancelled': 'Trip cancelled',
     'bookingStatus.completed': 'Completed',
     'bookingStatus.noShow': 'No-show',
+    'bookingStatus.expired': 'Expired (no answer)',
     // Driver
     'driver.bookings': 'Passengers',
     'driver.noBookings': 'No bookings yet.',
@@ -309,6 +310,7 @@ class AppStrings {
     'bookingStatus.tripCancelled': 'Trajet annulé',
     'bookingStatus.completed': 'Terminée',
     'bookingStatus.noShow': 'Absent',
+    'bookingStatus.expired': 'Expirée (sans réponse)',
     'driver.bookings': 'Passagers',
     'driver.noBookings': 'Aucune réservation pour le moment.',
     'driver.accept': 'Accepter',

@@ -143,6 +143,19 @@ public sealed class Trip
         Status = TripStatus.Completed;
     }
 
+    /// <summary>
+    /// Closes a trip the driver forgot to complete, so passengers can leave a review.
+    /// Returns false when the trip is not due yet.
+    /// </summary>
+    public bool AutoComplete(DateTimeOffset now, PlatformPolicy policy)
+    {
+        if (Status != TripStatus.Scheduled || now < DepartureAt.AddHours(policy.AutoCompleteAfterHours))
+            return false;
+
+        Status = TripStatus.Completed;
+        return true;
+    }
+
     public void EnsureDriver(Guid userId)
     {
         if (userId != DriverId)

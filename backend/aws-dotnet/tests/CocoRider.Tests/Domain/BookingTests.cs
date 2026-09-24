@@ -134,4 +134,28 @@ public class BookingTests
 
         Assert.Throws<ForbiddenException>(() => booking.Accept(trip, passenger.Id, Now));
     }
+
+    [Fact]
+    public void Unanswered_request_expires_at_departure()
+    {
+        var (_, trip) = PublishedTrip(departure: Now.AddHours(2), instantBooking: false);
+        var booking = Booking.Request(trip, VerifiedUser(), 2, PaymentMethod.Cash, Now, Policy);
+
+        booking.ExpireIfUnanswered(trip, Now.AddHours(1));
+        Assert.Equal(BookingStatus.Pending, booking.Status);
+
+        booking.ExpireIfUnanswered(trip, Now.AddHours(2));
+        Assert.Equal(BookingStatus.Expired, booking.Status);
+        Assert.Equal(3, trip.SeatsAvailable);
+    }
+
+    [Fact]
+    public void Trip_is_auto_completed_after_the_configured_delay()
+    {
+        var (_, trip) = PublishedTrip(departure: Now.AddHours(1));
+
+        Assert.False(trip.AutoComplete(Now.AddHours(12), Policy));
+        Assert.True(trip.AutoComplete(Now.AddHours(13), Policy));
+        Assert.False(trip.AutoComplete(Now.AddHours(14), Policy));
+    }
 }

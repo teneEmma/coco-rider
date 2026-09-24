@@ -35,6 +35,7 @@ enum BookingStatus {
   tripCancelled,
   completed,
   noShow,
+  expired,
 }
 
 enum PaymentMethod { cash, mtnMobileMoney, orangeMoney }

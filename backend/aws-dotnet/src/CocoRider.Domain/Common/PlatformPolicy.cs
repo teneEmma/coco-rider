@@ -22,6 +22,9 @@ public sealed class PlatformPolicy
     /// <summary>Trips must be published at least this many minutes before departure.</summary>
     public int MinimumMinutesBeforeDeparture { get; set; } = 30;
 
+    /// <summary>Trips the driver did not mark as completed are closed this many hours after departure.</summary>
+    public int AutoCompleteAfterHours { get; set; } = 12;
+
     /// <summary>Minimum face similarity (0-100) between the selfie and the national ID card for automatic approval.</summary>
     public float FaceMatchThreshold { get; set; } = 90f;
 

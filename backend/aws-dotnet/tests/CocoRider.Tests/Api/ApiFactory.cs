@@ -33,6 +33,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Auth:Mode", "Development");
         builder.UseSetting("Storage:Mode", "Fake");
         builder.UseSetting("Database:MigrateOnStartup", "true");
+        builder.UseSetting("Lifecycle:Enabled", "false");
         builder.ConfigureServices(services => services.Replace(ServiceDescriptor.Singleton<TimeProvider>(Clock)));
     }
 

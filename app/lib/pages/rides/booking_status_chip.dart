@@ -15,7 +15,7 @@ class BookingStatusChip extends StatelessWidget {
       BookingStatus.confirmed || BookingStatus.completed => CocoColors.keySuccess,
       BookingStatus.pending => const Color(0xFF9A5B00),
       BookingStatus.rejectedByDriver || BookingStatus.tripCancelled || BookingStatus.noShow => CocoColors.keyError,
-      BookingStatus.cancelledByPassenger => CocoColors.keyGrey,
+      BookingStatus.cancelledByPassenger || BookingStatus.expired => CocoColors.keyGrey,
     };
     return StatusChip(label: 'bookingStatus.${status.name}'.tr, color: color);
   }

@@ -90,6 +90,8 @@ Ask a lawyer whether storing ID documents in Ireland requires a declaration or a
 | 3 strikes within 90 days → suspended for 30 days | `User.AddStrike` | `Policy:MaxStrikes`, `StrikeWindowDays`, `SuspensionDays` |
 | Commission recorded on each booking | `PlatformPolicy.CommissionFor` | `Policy:CommissionRateBasisPoints` (0 now; 1000 = 10%) |
 | Seats are held while a request is pending; no overbooking even with simultaneous bookings | `Trip.ReserveSeats` + PostgreSQL `xmin` concurrency token | – |
+| A request the driver has not answered by departure expires and frees its seats | `TripLifecycle` (every 5 min) | `Lifecycle:IntervalMinutes` |
+| A trip the driver forgot to complete is closed 12 h after departure, so passengers can review | `Trip.AutoComplete` | `Policy:AutoCompleteAfterHours` |
 | Women-only trips: published by women, visible and bookable by women only | `Trip.Publish`, `Booking.Request`, search | – |
 | Phone numbers are revealed only once a booking is confirmed | trip/booking responses | – |
 | Trip published at least 30 min before departure, max 100,000 FCFA per seat | `Trip.Publish` | `Policy:MinimumMinutesBeforeDeparture` |

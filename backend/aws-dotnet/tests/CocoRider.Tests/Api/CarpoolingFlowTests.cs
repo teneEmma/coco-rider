@@ -10,6 +10,7 @@ using CocoRider.Domain.Bookings;
 using CocoRider.Domain.Trips;
 using CocoRider.Domain.Users;
 using CocoRider.Domain.Verification;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CocoRider.Tests.Api;
 
@@ -111,6 +112,52 @@ public class CarpoolingFlowTests(ApiFactory api) : IClassFixture<ApiFactory>
         Assert.True(stats!.Users > 0);
 
         Assert.Equal(HttpStatusCode.Unauthorized, (await api.CreateClient().GetAsync("/v1/me")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Unanswered_requests_expire_and_forgotten_trips_complete()
+    {
+        var (driver, _) = await SignUpAsync(Gender.Male, asDriver: true);
+        var vehicle = await driver.PostAsync<VehicleResponse>("/v1/me/vehicles",
+            new CreateVehicleRequest("Toyota", "Corolla", "Grise", NextPlate(), 4));
+        var onRequest = await driver.PostAsync<TripResponse>("/v1/trips",
+            NewTrip(vehicle.Id, 2, api.Clock.GetUtcNow().AddHours(2)) with { InstantBooking = false });
+        var instant = await driver.PostAsync<TripResponse>("/v1/trips", NewTrip(vehicle.Id, 2, api.Clock.GetUtcNow().AddHours(2)));
+
+        var (passenger, _) = await SignUpAsync(Gender.Female, asDriver: false);
+        var request = await passenger.PostAsync<BookingResponse>($"/v1/trips/{onRequest.Id}/bookings", new CreateBookingRequest(1, PaymentMethod.Cash));
+        var confirmed = await passenger.PostAsync<BookingResponse>($"/v1/trips/{instant.Id}/bookings", new CreateBookingRequest(1, PaymentMethod.Cash));
+        Assert.Equal(BookingStatus.Pending, request.Status);
+
+        // Just after departure: the unanswered request expires and frees its seat.
+        api.Clock.Advance(TimeSpan.FromHours(3));
+        var first = await RunLifecycleAsync();
+        Assert.True(first.ExpiredRequests >= 1);
+
+        var afterDeparture = await driver.GetFromJsonAsync<TripDetailsResponse>($"/v1/trips/{onRequest.Id}", ApiFactory.Json);
+        Assert.Equal(BookingStatus.Expired, afterDeparture!.Bookings!.Single().Status);
+        Assert.Equal(2, afterDeparture.Trip.SeatsAvailable);
+        Assert.Equal(TripStatus.Scheduled, afterDeparture.Trip.Status);
+
+        // 12 hours after departure the driver still has not completed the trip: it is closed for them.
+        api.Clock.Advance(TimeSpan.FromHours(11));
+        var second = await RunLifecycleAsync();
+        Assert.True(second.CompletedTrips >= 2);
+
+        var bookings = await passenger.GetFromJsonAsync<List<BookingResponse>>("/v1/me/bookings", ApiFactory.Json);
+        Assert.Equal(BookingStatus.Completed, bookings!.Single(b => b.Id == confirmed.Id).Status);
+
+        // ...so the passenger can now rate the driver.
+        var review = await passenger.PostAsJsonAsync($"/v1/bookings/{confirmed.Id}/reviews", new { rating = 5, comment = "Très bien" }, ApiFactory.Json);
+        Assert.Equal(HttpStatusCode.Created, review.StatusCode);
+
+        Assert.Equal(new LifecycleResult(0, 0), await RunLifecycleAsync());
+    }
+
+    private async Task<LifecycleResult> RunLifecycleAsync()
+    {
+        using var scope = api.Services.CreateScope();
+        return await scope.ServiceProvider.GetRequiredService<TripLifecycle>().RunAsync(CancellationToken.None);
     }
 
     private async Task<(HttpClient Client, ProfileResponse Profile)> SignUpAsync(Gender gender, bool asDriver)

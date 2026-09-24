@@ -25,6 +25,9 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddCocoRiderAuth(builder.Configuration, builder.Environment);
 builder.Services.AddScoped<VerificationService>();
 builder.Services.AddScoped<TripReader>();
+builder.Services.Configure<LifecycleOptions>(builder.Configuration.GetSection("Lifecycle"));
+builder.Services.AddScoped<TripLifecycle>();
+builder.Services.AddHostedService<TripLifecycleService>();
 
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
