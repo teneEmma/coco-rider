@@ -63,3 +63,14 @@ test('budget alert is configured', () => {
     Budget: Match.objectLike({ BudgetLimit: { Amount: 100, Unit: 'USD' } }),
   });
 });
+
+test('websites are private buckets behind CloudFront', () => {
+  template.resourceCountIs('AWS::CloudFront::Distribution', 2);
+  template.resourceCountIs('AWS::CloudFront::OriginAccessControl', 2);
+});
+
+test('only the admin dashboard origin may call the API from a browser', () => {
+  template.hasResourceProperties('AWS::ApiGatewayV2::Api', {
+    CorsConfiguration: Match.objectLike({ AllowOrigins: [Match.anyValue()] }),
+  });
+});

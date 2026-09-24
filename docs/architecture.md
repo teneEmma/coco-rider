@@ -8,7 +8,7 @@ Carpooling for Cameroon: private drivers (and clandos) share the cost of interci
 | Topic | Decision |
 |---|---|
 | Mobile app | Flutter (Android + iOS), French and English |
-| Websites | React: landing page (download links) in `web/landing`, admin dashboard in `web/admin` (to do) |
+| Websites | React: landing page in `web/landing`, admin dashboard in `web/admin`, both on S3 + CloudFront |
 | Backend | C# / ASP.NET Core (.NET 10), one container on ECS Fargate (ARM) – `backend/aws-dotnet` |
 | Database | PostgreSQL 16 + PostGIS on RDS (db.t4g.micro) |
 | Auth | Amazon Cognito, sign-in with phone number + SMS code |
@@ -45,6 +45,7 @@ Carpooling for Cameroon: private drivers (and clandos) share the cost of interci
 | Public IPv4 address of the task | 3.65 |
 | API Gateway HTTP API (first millions of requests) | 1 – 3 |
 | CloudWatch logs (14 days), Secrets Manager, ECR, Cloud Map, S3 | 3 – 6 |
+| CloudFront for the two websites (always-free tier: 1 TB/month) | 0 |
 | Cognito (Essentials, free up to 10,000 monthly active users) | 0 |
 | Rekognition (≈ 5 images per driver at $0.001) | < 5 |
 | **Total without SMS** | **≈ 30 – 45** |
@@ -149,8 +150,8 @@ payment method, total, commission) · `reviews` (1–5, one per author per booki
 ## Roadmap
 
 1. **Flutter app → new backend**: replace Firebase Auth with Cognito (`amplify_auth_cognito`), call the API.
-2. **Admin dashboard** (`web/admin`, React): review queue, users, stats.
-3. **Landing page** (`web/landing`, React): presentation + store links.
+2. ~~Admin dashboard~~ (`web/admin`) and ~~landing page~~ (`web/landing`) – done.
+3. Custom domain (e.g. cocorider.cm) for the websites and the API.
 4. **Push notifications** (booking requests, confirmations) via Firebase Cloud Messaging or SNS mobile push.
 5. **In-app chat**, then **live trip tracking / trip sharing** (planned for later).
 6. **Payments**: pick a Mobile Money aggregator; collect the commission (driver prepaid credit or passenger fee); yearly subscriptions.

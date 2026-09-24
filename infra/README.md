@@ -9,13 +9,15 @@ Costs and design choices: [docs/architecture.md](../docs/architecture.md).
 Requirements: Node 20+, Docker (the API image is built for ARM during `cdk deploy`), AWS credentials.
 
 ```bash
+(cd ../web/admin && npm ci && npm run build)
+(cd ../web/landing && npm ci && npm run build)
 npm ci
 # optional: set "budgetEmail" in cdk.json to receive cost alerts
 npx cdk bootstrap aws://<ACCOUNT_ID>/eu-west-1   # once per account/region
 npx cdk deploy
 ```
 
-The outputs give the API URL, the Cognito user pool and client ids for the app and the dashboard.
+The outputs give the API URL, the admin dashboard and landing page URLs, and the Cognito ids for the app.
 
 After the first deployment:
 1. **SMS**: in Amazon SNS, request to leave the SMS sandbox and set a monthly SMS spending limit, otherwise sign-in codes only reach verified numbers.
@@ -27,7 +29,7 @@ After the first deployment:
 ```bash
 npm test          # checks the cost guardrails (no NAT, no load balancer, small instances…)
 npx cdk diff      # what a deployment would change
-npx cdk deploy    # also rebuilds and redeploys the API image
+npx cdk deploy    # rebuilds the API image and re-uploads web/*/dist (build them first)
 ```
 
 To use another region: `npx cdk deploy -c region=eu-west-3` (see the region table in the architecture doc first).

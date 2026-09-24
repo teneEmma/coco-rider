@@ -6,6 +6,7 @@ Carpooling app for Cameroon: private drivers and clandos share the cost of inter
 |---|---|
 | `app/` | Flutter mobile app (Android, iOS) |
 | `backend/aws-dotnet/` | New backend: C# / ASP.NET Core API, PostgreSQL + PostGIS |
+| `web/admin/`, `web/landing/` | React admin dashboard and landing page |
 | `infra/` | AWS infrastructure (CDK, TypeScript) |
 | `backend/functions/`, `firebase.json` | Previous Firebase backend, kept until the app is migrated |
 | `docs/architecture.md` | Architecture, costs, business rules, API |

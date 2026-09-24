@@ -15,6 +15,7 @@ import {
   aws_servicediscovery as sd,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { StaticSite } from './static-site';
 
 export interface CocoRiderStackProps extends StackProps {
   /** Receives the budget alerts at 80% and 100% of the monthly budget. Empty = no budget. */
@@ -194,6 +195,11 @@ export class CocoRiderStack extends Stack {
       },
     });
 
+    // ---------- Websites: admin dashboard and landing page ----------
+    const webDir = path.join(__dirname, '../../web');
+    const landing = new StaticSite(this, 'Landing', { buildDir: path.join(webDir, 'landing/dist') });
+    const admin = new StaticSite(this, 'Admin', { buildDir: path.join(webDir, 'admin/dist') });
+
     // ---------- Public entry point: API Gateway HTTP API ----------
     const vpcLink = new apigw.VpcLink(this, 'VpcLink', {
       vpc,
@@ -205,6 +211,13 @@ export class CocoRiderStack extends Stack {
       apiName: 'coco-rider-api',
       createDefaultStage: false,
       defaultIntegration: new integrations.HttpServiceDiscoveryIntegration('Api', service.cloudMapService!, { vpcLink }),
+      // The mobile app is not a browser; only the admin dashboard needs CORS.
+      corsPreflight: {
+        allowOrigins: [admin.url],
+        allowMethods: [apigw.CorsHttpMethod.ANY],
+        allowHeaders: ['authorization', 'content-type'],
+        maxAge: Duration.hours(1),
+      },
     });
     new apigw.HttpStage(this, 'DefaultStage', {
       httpApi,
@@ -236,10 +249,21 @@ export class CocoRiderStack extends Stack {
       });
     }
 
+    landing.publish();
+    admin.publish({
+      apiUrl: httpApi.apiEndpoint,
+      authMode: 'cognito',
+      region: this.region,
+      userPoolId: userPool.userPoolId,
+      clientId: adminClient.userPoolClientId,
+    });
+
     new CfnOutput(this, 'ApiUrl', { value: httpApi.apiEndpoint });
     new CfnOutput(this, 'UserPoolId', { value: userPool.userPoolId });
     new CfnOutput(this, 'MobileClientId', { value: mobileClient.userPoolClientId });
     new CfnOutput(this, 'AdminClientId', { value: adminClient.userPoolClientId });
     new CfnOutput(this, 'DocumentsBucket', { value: documents.bucketName });
+    new CfnOutput(this, 'AdminUrl', { value: admin.url });
+    new CfnOutput(this, 'LandingUrl', { value: landing.url });
   }
 }
