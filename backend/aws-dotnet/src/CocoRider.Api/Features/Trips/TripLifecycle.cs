@@ -1,3 +1,4 @@
+using CocoRider.Api.Features.Notifications;
 using CocoRider.Domain.Bookings;
 using CocoRider.Domain.Common;
 using CocoRider.Domain.Trips;
@@ -25,6 +26,7 @@ public sealed class TripLifecycle(
     CocoRiderDbContext db,
     IOptions<PlatformPolicy> policy,
     TimeProvider clock,
+    Notifier notifier,
     ILogger<TripLifecycle> logger)
 {
     private const int BatchSize = 200;
@@ -71,20 +73,17 @@ public sealed class TripLifecycle(
         var trip = await db.Trips.FirstAsync(t => t.Id == tripId, ct);
         var bookings = await db.Bookings.Where(b => b.TripId == tripId).ToListAsync(ct);
 
-        var expired = 0;
-        foreach (var booking in bookings.Where(b => b.Status == BookingStatus.Pending))
-        {
-            booking.ExpireIfUnanswered(trip, now);
-            expired++;
-        }
+        var expired = bookings.Where(b => b.Status == BookingStatus.Pending).ToList();
+        expired.ForEach(b => b.ExpireIfUnanswered(trip, now));
 
         var completed = trip.AutoComplete(now, policy.Value);
-        if (completed)
-            bookings.ForEach(b => b.CompleteWithTrip(now));
+        var finished = completed ? bookings.Where(b => b.HoldsSeats).ToList() : [];
+        finished.ForEach(b => b.CompleteWithTrip(now));
 
         await db.SaveChangesAsync(ct);
         db.ChangeTracker.Clear();
-        return (expired, completed ? 1 : 0);
+        notifier.TripOutcome(trip, [.. expired, .. finished]);
+        return (expired.Count, completed ? 1 : 0);
     }
 }
 

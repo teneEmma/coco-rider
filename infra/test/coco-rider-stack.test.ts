@@ -74,3 +74,14 @@ test('only the admin dashboard origin may call the API from a browser', () => {
     CorsConfiguration: Match.objectLike({ AllowOrigins: [Match.anyValue()] }),
   });
 });
+
+test('the Firebase key is a secret injected into the API container', () => {
+  template.hasResourceProperties('AWS::SecretsManager::Secret', { Name: 'coco-rider/fcm-service-account' });
+  template.hasResourceProperties('AWS::ECS::TaskDefinition', {
+    ContainerDefinitions: Match.arrayWith([
+      Match.objectLike({
+        Secrets: Match.arrayWith([Match.objectLike({ Name: 'Notifications__FcmServiceAccountJson' })]),
+      }),
+    ]),
+  });
+});

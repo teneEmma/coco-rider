@@ -1,4 +1,5 @@
 using CocoRider.Domain.Bookings;
+using CocoRider.Domain.Notifications;
 using CocoRider.Domain.Reviews;
 using CocoRider.Domain.Trips;
 using CocoRider.Domain.Users;
@@ -17,6 +18,7 @@ public sealed class CocoRiderDbContext(DbContextOptions<CocoRiderDbContext> opti
     public DbSet<Trip> Trips => Set<Trip>();
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<Review> Reviews => Set<Review>();
+    public DbSet<DeviceToken> DeviceTokens => Set<DeviceToken>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -25,7 +27,7 @@ public sealed class CocoRiderDbContext(DbContextOptions<CocoRiderDbContext> opti
         [
             typeof(Language), typeof(Gender), typeof(VerificationStatus), typeof(StrikeReason),
             typeof(DocumentType), typeof(DocumentStatus), typeof(TripKind), typeof(TripStatus),
-            typeof(BookingStatus), typeof(PaymentMethod),
+            typeof(BookingStatus), typeof(PaymentMethod), typeof(DevicePlatform),
         ];
         foreach (var type in enums)
             configurationBuilder.Properties(type).HaveConversion<string>().HaveMaxLength(32);

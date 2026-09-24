@@ -4,6 +4,7 @@ using CocoRider.Api.Errors;
 using CocoRider.Api.Features.Admin;
 using CocoRider.Api.Features.Bookings;
 using CocoRider.Api.Features.Documents;
+using CocoRider.Api.Features.Notifications;
 using CocoRider.Api.Features.Profile;
 using CocoRider.Api.Features.Reviews;
 using CocoRider.Api.Features.Trips;
@@ -28,6 +29,9 @@ builder.Services.AddScoped<TripReader>();
 builder.Services.Configure<LifecycleOptions>(builder.Configuration.GetSection("Lifecycle"));
 builder.Services.AddScoped<TripLifecycle>();
 builder.Services.AddHostedService<TripLifecycleService>();
+builder.Services.AddSingleton<NotificationQueue>();
+builder.Services.AddSingleton<Notifier>();
+builder.Services.AddHostedService<NotificationDispatcher>();
 
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
@@ -65,6 +69,7 @@ app.MapTripEndpoints();
 app.MapBookingEndpoints();
 app.MapReviewEndpoints();
 app.MapAdminEndpoints();
+app.MapDeviceEndpoints();
 
 if (app.Environment.IsDevelopment() && app.Services.GetService<FakeDocumentStorage>() is { } fakeStorage)
 {

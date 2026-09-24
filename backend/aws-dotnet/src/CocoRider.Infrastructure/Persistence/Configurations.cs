@@ -1,4 +1,5 @@
 using CocoRider.Domain.Bookings;
+using CocoRider.Domain.Notifications;
 using CocoRider.Domain.Reviews;
 using CocoRider.Domain.Trips;
 using CocoRider.Domain.Users;
@@ -125,5 +126,17 @@ internal sealed class ReviewConfiguration : IEntityTypeConfiguration<Review>
         // One review per author per booking.
         builder.HasIndex(r => new { r.BookingId, r.AuthorId }).IsUnique();
         builder.HasIndex(r => r.SubjectId);
+    }
+}
+
+internal sealed class DeviceTokenConfiguration : IEntityTypeConfiguration<DeviceToken>
+{
+    public void Configure(EntityTypeBuilder<DeviceToken> builder)
+    {
+        builder.HasKey(d => d.Id);
+        builder.Property(d => d.Token).HasMaxLength(512);
+        builder.HasIndex(d => d.Token).IsUnique();
+        builder.HasIndex(d => d.UserId);
+        builder.HasOne<User>().WithMany().HasForeignKey(d => d.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 }

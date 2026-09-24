@@ -1,5 +1,6 @@
 using CocoRider.Api.Auth;
 using CocoRider.Api.Features.Documents;
+using CocoRider.Api.Features.Notifications;
 using CocoRider.Domain.Bookings;
 using CocoRider.Domain.Common;
 using CocoRider.Domain.Trips;
@@ -81,15 +82,15 @@ public static class AdminEndpoints
     }
 
     private static Task<IResult> ApproveAsync(Guid id, CurrentUser current, CocoRiderDbContext db, VerificationService verification,
-        TimeProvider clock, CancellationToken ct) =>
-        DecideAsync(id, db, verification, ct, d => d.Approve(current.Sub, clock.GetUtcNow()));
+        Notifier notifier, TimeProvider clock, CancellationToken ct) =>
+        DecideAsync(id, db, verification, notifier, ct, d => d.Approve(current.Sub, clock.GetUtcNow()));
 
     private static Task<IResult> RejectAsync(Guid id, RejectDocumentRequest request, CurrentUser current, CocoRiderDbContext db,
-        VerificationService verification, TimeProvider clock, CancellationToken ct) =>
-        DecideAsync(id, db, verification, ct, d => d.Reject(current.Sub, request.Reason, clock.GetUtcNow()));
+        VerificationService verification, Notifier notifier, TimeProvider clock, CancellationToken ct) =>
+        DecideAsync(id, db, verification, notifier, ct, d => d.Reject(current.Sub, request.Reason, clock.GetUtcNow()));
 
     private static async Task<IResult> DecideAsync(Guid id, CocoRiderDbContext db, VerificationService verification,
-        CancellationToken ct, Action<UserDocument> decide)
+        Notifier notifier, CancellationToken ct, Action<UserDocument> decide)
     {
         var document = await db.Documents.FirstOrDefaultAsync(d => d.Id == id, ct)
             ?? throw new NotFoundException("document.not_found", "Document not found.");
@@ -99,6 +100,7 @@ public static class AdminEndpoints
         await db.SaveChangesAsync(ct);
         await verification.RefreshAsync(user, ct);
         await db.SaveChangesAsync(ct);
+        notifier.DocumentReviewed(document);
         return Results.Ok(DocumentResponse.From(document));
     }
 

@@ -23,6 +23,11 @@ After the first deployment:
 1. **SMS**: in Amazon SNS, request to leave the SMS sandbox and set a monthly SMS spending limit, otherwise sign-in codes only reach verified numbers.
 2. **Admins**: add dashboard users to the `admin` Cognito group.
 3. **PostGIS** is enabled by the first database migration (the RDS master user is allowed to create it).
+4. **Push notifications**: in the Firebase console (project `coco-rider-dev`) → Project settings → Service
+   accounts → *Generate new private key*. Paste the whole JSON file into the Secrets Manager secret
+   `coco-rider/fcm-service-account` (output `FcmSecretName`), then restart the API:
+   `aws ecs update-service --cluster <cluster> --service <service> --force-new-deployment`.
+   For iOS, also upload an APNs key in Firebase → Project settings → Cloud Messaging.
 
 ## Everyday commands
 

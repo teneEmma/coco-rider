@@ -8,6 +8,7 @@
     <PackageReference Include="AWSSDK.Rekognition" Version="4.0.100.14" />
     <PackageReference Include="AWSSDK.S3" Version="4.0.103.4" />
     <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
+    <PackageReference Include="FirebaseAdmin" Version="3.6.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

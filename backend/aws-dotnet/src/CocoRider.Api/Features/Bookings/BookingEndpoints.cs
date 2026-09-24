@@ -1,5 +1,6 @@
 using CocoRider.Api.Auth;
 using CocoRider.Api.Features.Documents;
+using CocoRider.Api.Features.Notifications;
 using CocoRider.Api.Features.Trips;
 using CocoRider.Domain.Bookings;
 using CocoRider.Domain.Common;
@@ -32,7 +33,7 @@ public static class BookingEndpoints
 
     private static async Task<IResult> CreateAsync(Guid tripId, CreateBookingRequest request, CurrentUser current,
         CocoRiderDbContext db, VerificationService verification, TripReader reader, IOptions<PlatformPolicy> policy,
-        TimeProvider clock, CancellationToken ct)
+        Notifier notifier, TimeProvider clock, CancellationToken ct)
     {
         var booking = await Concurrency.RetryAsync(db, async () =>
         {
@@ -48,6 +49,7 @@ public static class BookingEndpoints
             var created = Booking.Request(trip, passenger, request.Seats, request.PaymentMethod, clock.GetUtcNow(), policy.Value);
             db.Bookings.Add(created);
             await db.SaveChangesAsync(ct);
+            notifier.BookingCreated(created, trip, passenger);
             return created;
         });
 
@@ -68,17 +70,22 @@ public static class BookingEndpoints
     }
 
     private static Task<BookingResponse> AcceptAsync(Guid id, CurrentUser current, CocoRiderDbContext db, TripReader reader,
-        TimeProvider clock, CancellationToken ct) =>
-        ChangeAsync(id, current, db, reader, ct, (booking, trip, user) => booking.Accept(trip, user.Id, clock.GetUtcNow()));
+        Notifier notifier, TimeProvider clock, CancellationToken ct) =>
+        ChangeAsync(id, current, db, reader, ct,
+            (booking, trip, user) => booking.Accept(trip, user.Id, clock.GetUtcNow()),
+            (booking, trip, _) => notifier.BookingAnswered(booking, trip));
 
     private static Task<BookingResponse> RejectAsync(Guid id, CurrentUser current, CocoRiderDbContext db, TripReader reader,
-        TimeProvider clock, CancellationToken ct) =>
-        ChangeAsync(id, current, db, reader, ct, (booking, trip, user) => booking.Reject(trip, user.Id, clock.GetUtcNow()));
+        Notifier notifier, TimeProvider clock, CancellationToken ct) =>
+        ChangeAsync(id, current, db, reader, ct,
+            (booking, trip, user) => booking.Reject(trip, user.Id, clock.GetUtcNow()),
+            (booking, trip, _) => notifier.BookingAnswered(booking, trip));
 
     private static Task<BookingResponse> CancelAsync(Guid id, CurrentUser current, CocoRiderDbContext db, TripReader reader,
-        IOptions<PlatformPolicy> policy, TimeProvider clock, CancellationToken ct) =>
+        IOptions<PlatformPolicy> policy, Notifier notifier, TimeProvider clock, CancellationToken ct) =>
         ChangeAsync(id, current, db, reader, ct,
-            (booking, trip, user) => booking.CancelByPassenger(trip, user.Id, clock.GetUtcNow(), policy.Value));
+            (booking, trip, user) => booking.CancelByPassenger(trip, user.Id, clock.GetUtcNow(), policy.Value),
+            notifier.BookingCancelledByPassenger);
 
     /// <summary>The driver reports a no-show after departure; the passenger gets a strike.</summary>
     private static Task<BookingResponse> NoShowAsync(Guid id, CurrentUser current, CocoRiderDbContext db, TripReader reader,
@@ -92,15 +99,16 @@ public static class BookingEndpoints
         });
 
     private static Task<BookingResponse> ChangeAsync(Guid id, CurrentUser current, CocoRiderDbContext db, TripReader reader,
-        CancellationToken ct, Action<Booking, Domain.Trips.Trip, User> change) =>
+        CancellationToken ct, Action<Booking, Domain.Trips.Trip, User> change, Action<Booking, Domain.Trips.Trip, User>? afterSave = null) =>
         ChangeAsync(id, current, db, reader, ct, (booking, trip, user) =>
         {
             change(booking, trip, user);
             return Task.CompletedTask;
-        });
+        }, afterSave);
 
+    /// <param name="afterSave">Runs once the change is saved (e.g. to notify the other party).</param>
     private static Task<BookingResponse> ChangeAsync(Guid id, CurrentUser current, CocoRiderDbContext db, TripReader reader,
-        CancellationToken ct, Func<Booking, Domain.Trips.Trip, User, Task> change) =>
+        CancellationToken ct, Func<Booking, Domain.Trips.Trip, User, Task> change, Action<Booking, Domain.Trips.Trip, User>? afterSave = null) =>
         Concurrency.RetryAsync(db, async () =>
         {
             var user = await current.RequireProfileAsync(ct);
@@ -113,6 +121,7 @@ public static class BookingEndpoints
 
             await change(booking, trip, user);
             await db.SaveChangesAsync(ct);
+            afterSave?.Invoke(booking, trip, user);
             return await ToResponseAsync(db, reader, booking, ct);
         });
 

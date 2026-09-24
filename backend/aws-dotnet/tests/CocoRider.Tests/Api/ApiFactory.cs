@@ -7,6 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Time.Testing;
 using Testcontainers.PostgreSql;
+using CocoRider.Infrastructure.Notifications;
+using System.Collections.Concurrent;
 
 namespace CocoRider.Tests.Api;
 
@@ -14,6 +16,9 @@ namespace CocoRider.Tests.Api;
 public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder("postgis/postgis:16-3.4-alpine").Build();
+
+    /// <summary>Every push notification the API tried to send.</summary>
+    public RecordingPushSender Push { get; } = new();
 
     public FakeTimeProvider Clock { get; } = new(new DateTimeOffset(2026, 10, 1, 7, 0, 0, TimeSpan.Zero));
 
@@ -34,7 +39,11 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Storage:Mode", "Fake");
         builder.UseSetting("Database:MigrateOnStartup", "true");
         builder.UseSetting("Lifecycle:Enabled", "false");
-        builder.ConfigureServices(services => services.Replace(ServiceDescriptor.Singleton<TimeProvider>(Clock)));
+        builder.ConfigureServices(services =>
+        {
+            services.Replace(ServiceDescriptor.Singleton<TimeProvider>(Clock));
+            services.Replace(ServiceDescriptor.Singleton<IPushSender>(Push));
+        });
     }
 
     /// <summary>A client authenticated as the given Cognito user.</summary>
@@ -65,5 +74,32 @@ internal static class HttpExtensions
     {
         using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         return json.RootElement.TryGetProperty("code", out var code) ? code.GetString() : null;
+    }
+}
+
+public sealed class RecordingPushSender : IPushSender
+{
+    public ConcurrentQueue<(IReadOnlyList<string> Tokens, PushMessage Message)> Sent { get; } = new();
+
+    /// <summary>Tokens reported to the API as no longer valid.</summary>
+    public ConcurrentDictionary<string, bool> InvalidTokens { get; } = new();
+
+    public Task<IReadOnlyList<string>> SendAsync(IReadOnlyList<string> tokens, PushMessage message, CancellationToken ct)
+    {
+        Sent.Enqueue((tokens, message));
+        return Task.FromResult<IReadOnlyList<string>>(tokens.Where(InvalidTokens.ContainsKey).ToList());
+    }
+
+    /// <summary>Waits for the background dispatcher to send a message to the token.</summary>
+    public async Task<PushMessage> WaitForAsync(string token, Func<PushMessage, bool> match)
+    {
+        for (var i = 0; i < 100; i++)
+        {
+            var found = Sent.FirstOrDefault(s => s.Tokens.Contains(token) && match(s.Message));
+            if (found.Message is not null)
+                return found.Message;
+            await Task.Delay(50);
+        }
+        throw new TimeoutException($"No push notification for {token}");
     }
 }

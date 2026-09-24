@@ -1,5 +1,6 @@
 using CocoRider.Api.Auth;
 using CocoRider.Api.Features.Documents;
+using CocoRider.Api.Features.Notifications;
 using CocoRider.Domain.Bookings;
 using CocoRider.Domain.Common;
 using CocoRider.Domain.Trips;
@@ -143,7 +144,7 @@ public static class TripEndpoints
     /// that affects passengers costs the driver a strike.
     /// </summary>
     private static Task<TripResponse> CancelAsync(Guid id, CurrentUser current, CocoRiderDbContext db, TripReader reader,
-        IOptions<PlatformPolicy> policy, TimeProvider clock, CancellationToken ct) =>
+        IOptions<PlatformPolicy> policy, Notifier notifier, TimeProvider clock, CancellationToken ct) =>
         Concurrency.RetryAsync(db, async () =>
         {
             var driver = await current.RequireProfileAsync(ct);
@@ -152,28 +153,32 @@ public static class TripEndpoints
 
             var late = trip.Cancel(driver.Id, now, policy.Value);
             var bookings = await db.Bookings.Where(b => b.TripId == trip.Id).ToListAsync(ct);
-            var affected = bookings.Count(b => b.HoldsSeats);
-            bookings.ForEach(b => b.CancelBecauseTripCancelled(now));
+            var affected = bookings.Where(b => b.HoldsSeats).ToList();
+            affected.ForEach(b => b.CancelBecauseTripCancelled(now));
 
-            if (late && affected > 0)
+            if (late && affected.Count > 0)
                 driver.AddStrike(StrikeReason.DriverLateCancellation, null, now, policy.Value);
 
             await db.SaveChangesAsync(ct);
+            notifier.TripOutcome(trip, affected);
             return await reader.ToResponseAsync(trip, ct);
         });
 
     private static async Task<TripResponse> CompleteAsync(Guid id, CurrentUser current, CocoRiderDbContext db, TripReader reader,
-        TimeProvider clock, CancellationToken ct)
+        Notifier notifier, TimeProvider clock, CancellationToken ct)
     {
         var driver = await current.RequireProfileAsync(ct);
         var trip = await FindTripAsync(db, id, ct);
         var now = clock.GetUtcNow();
 
         trip.Complete(driver.Id, now);
-        var bookings = await db.Bookings.Where(b => b.TripId == trip.Id).ToListAsync(ct);
-        bookings.ForEach(b => b.CompleteWithTrip(now));
+        var affected = await db.Bookings
+            .Where(b => b.TripId == trip.Id && (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed))
+            .ToListAsync(ct);
+        affected.ForEach(b => b.CompleteWithTrip(now));
 
         await db.SaveChangesAsync(ct);
+        notifier.TripOutcome(trip, affected);
         return await reader.ToResponseAsync(trip, ct);
     }
 

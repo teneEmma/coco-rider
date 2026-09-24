@@ -192,6 +192,15 @@ class CocoApi {
   Future<void> review(String bookingId, {required int rating, String? comment}) =>
       _send('POST', '/v1/bookings/$bookingId/reviews', {'rating': rating, 'comment': comment});
 
+  // ---------- Push notifications ----------
+
+  /// [platform] is "Android", "Ios" or "Web".
+  Future<void> registerDevice(String token, String platform) =>
+      _send('PUT', '/v1/me/devices', {'token': token, 'platform': platform});
+
+  Future<void> unregisterDevice(String token) =>
+      _send('DELETE', '/v1/me/devices/${Uri.encodeComponent(token)}');
+
   // ---------- Plumbing ----------
 
   static List<T> _list<T>(dynamic json, T Function(Map<String, dynamic>) parse) =>

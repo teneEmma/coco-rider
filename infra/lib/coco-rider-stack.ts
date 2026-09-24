@@ -1,6 +1,6 @@
 import * as path from 'path';
 import {
-  CfnOutput, Duration, RemovalPolicy, Stack, StackProps,
+  CfnOutput, Duration, RemovalPolicy, SecretValue, Stack, StackProps,
   aws_apigatewayv2 as apigw,
   aws_apigatewayv2_integrations as integrations,
   aws_budgets as budgets,
@@ -12,6 +12,7 @@ import {
   aws_logs as logs,
   aws_rds as rds,
   aws_s3 as s3,
+  aws_secretsmanager as secretsmanager,
   aws_servicediscovery as sd,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
@@ -119,6 +120,16 @@ export class CocoRiderStack extends Stack {
       refreshTokenValidity: Duration.days(1),
     });
 
+    // ---------- Push notifications (Firebase Cloud Messaging) ----------
+    // Paste the Firebase service account key (JSON) into this secret, then restart the service.
+    // Until then the API only logs notifications.
+    const fcmServiceAccount = new secretsmanager.Secret(this, 'FcmServiceAccount', {
+      secretName: 'coco-rider/fcm-service-account',
+      description: 'Firebase service account key (JSON) used by the API to send push notifications',
+      secretStringValue: SecretValue.unsafePlainText('{}'),
+      removalPolicy: RemovalPolicy.RETAIN,
+    });
+
     // ---------- API container ----------
     const cluster = new ecs.Cluster(this, 'Cluster', {
       vpc,
@@ -162,6 +173,7 @@ export class CocoRiderStack extends Stack {
         Database__Port: ecs.Secret.fromSecretsManager(dbSecret, 'port'),
         Database__Username: ecs.Secret.fromSecretsManager(dbSecret, 'username'),
         Database__Password: ecs.Secret.fromSecretsManager(dbSecret, 'password'),
+        Notifications__FcmServiceAccountJson: ecs.Secret.fromSecretsManager(fcmServiceAccount),
       },
     });
 
@@ -263,6 +275,7 @@ export class CocoRiderStack extends Stack {
     new CfnOutput(this, 'MobileClientId', { value: mobileClient.userPoolClientId });
     new CfnOutput(this, 'AdminClientId', { value: adminClient.userPoolClientId });
     new CfnOutput(this, 'DocumentsBucket', { value: documents.bucketName });
+    new CfnOutput(this, 'FcmSecretName', { value: fcmServiceAccount.secretName });
     new CfnOutput(this, 'AdminUrl', { value: admin.url });
     new CfnOutput(this, 'LandingUrl', { value: landing.url });
   }

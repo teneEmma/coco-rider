@@ -6,6 +6,8 @@ import 'package:coco_rider/services/api/coco_api.dart';
 import 'package:coco_rider/services/authentication/auth.dart';
 import 'package:coco_rider/services/authentication/base_authentication.dart';
 import 'package:coco_rider/services/config/app_config.dart';
+import 'package:coco_rider/services/notifications/push_messaging.dart';
+import 'package:coco_rider/services/notifications/push_notifications.dart';
 import 'package:coco_rider/services/session_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -18,9 +20,25 @@ Future<void> main() async {
 
   final auth = Get.put(Auth(AppConfig.usesCognito ? AuthType.cognito : AuthType.development));
   final api = Get.put(CocoApi(baseUrl: AppConfig.apiUrl, authHeaders: auth.authHeaders));
-  Get.put(SessionController(auth: auth, api: api));
+  final push = PushNotifications(
+    messaging: FirebasePushMessaging(),
+    api: api,
+    onForeground: (event) => Get.snackbar(
+      event.title ?? 'Coco Rider',
+      event.body ?? '',
+      onTap: (_) => _openTrip(event.tripId),
+      duration: const Duration(seconds: 5),
+    ),
+    onOpen: (event) => _openTrip(event.tripId),
+  );
+  Get.put(SessionController(auth: auth, api: api, push: push));
 
   runApp(const MyApp());
+}
+
+/// Notifications about a trip or a booking open the trip details.
+void _openTrip(String? tripId) {
+  if (tripId != null) Get.toNamed(CocoRoutes.keyTripDetailsPage, arguments: tripId);
 }
 
 class MyApp extends StatelessWidget {

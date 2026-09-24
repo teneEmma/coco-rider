@@ -2,6 +2,7 @@ import 'package:coco_rider/common/navigation/routes.dart';
 import 'package:coco_rider/services/api/coco_api.dart';
 import 'package:coco_rider/services/api/models.dart';
 import 'package:coco_rider/services/authentication/auth.dart';
+import 'package:coco_rider/services/notifications/push_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,8 +10,9 @@ import 'package:get/get.dart';
 class SessionController extends GetxController {
   final Auth auth;
   final CocoApi api;
+  final PushNotifications? push;
 
-  SessionController({required this.auth, required this.api});
+  SessionController({required this.auth, required this.api, this.push});
 
   final Rx<Profile?> profile = Rx<Profile?>(null);
 
@@ -34,6 +36,8 @@ class SessionController extends GetxController {
   void setProfile(Profile value) => _apply(value);
 
   Future<void> logout() async {
+    // Unregister the phone while the session is still valid.
+    await push?.stop();
     await auth.logout();
     profile.value = null;
     Get.offAllNamed(CocoRoutes.keyAuthenticationPage);
@@ -41,6 +45,8 @@ class SessionController extends GetxController {
 
   void _apply(Profile value) {
     profile.value = value;
+    // Signed in with a profile: this phone can receive the account's notifications.
+    push?.start();
     final locale = value.language == Language.english
         ? const Locale('en', 'CM')
         : const Locale('fr', 'CM');

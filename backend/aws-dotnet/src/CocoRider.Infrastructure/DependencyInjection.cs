@@ -1,11 +1,14 @@
 using Amazon.Rekognition;
 using Amazon.S3;
 using CocoRider.Infrastructure.DocumentChecks;
+using CocoRider.Infrastructure.Notifications;
 using CocoRider.Infrastructure.Persistence;
 using CocoRider.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace CocoRider.Infrastructure;
@@ -37,6 +40,16 @@ public static class DependencyInjection
             services.AddSingleton<IDocumentStorage, S3DocumentStorage>();
             services.AddSingleton<IDocumentChecker, RekognitionDocumentChecker>();
         }
+
+        services.Configure<NotificationOptions>(configuration.GetSection("Notifications"));
+        services.AddSingleton<IPushSender>(sp =>
+        {
+            var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("Notifications");
+            var messaging = FcmPushSender.TryCreateMessaging(sp.GetRequiredService<IOptions<NotificationOptions>>().Value, logger);
+            return messaging is null
+                ? ActivatorUtilities.CreateInstance<LoggingPushSender>(sp)
+                : ActivatorUtilities.CreateInstance<FcmPushSender>(sp, messaging);
+        });
 
         return services;
     }

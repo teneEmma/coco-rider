@@ -142,19 +142,37 @@ All endpoints require a Cognito ID token except `/health`. Errors are RFC 7807 J
 | POST | `/v1/admin/documents/{id}/approve`, `/reject` | admin group |
 | POST | `/v1/admin/users/{id}/suspend`, `/unsuspend` | admin group |
 
+## Push notifications (Firebase Cloud Messaging)
+
+The app registers its FCM token after sign-in (`PUT /v1/me/devices`) and removes it on sign-out.
+The API queues notifications in memory and a background service sends them, in the user's language,
+to all their phones; tokens Firebase reports as invalid are deleted.
+
+| Event | Who is notified |
+|---|---|
+| New booking / new booking request | Driver |
+| Passenger cancelled | Driver |
+| Request accepted / declined / expired | Passenger |
+| Trip cancelled by the driver | Passengers |
+| Trip completed ("rate your trip") | Passengers |
+| Document approved / refused by an admin | The user |
+
+Tapping a notification opens the trip. FCM is free; without a service account key the API only
+logs the notifications.
+
 ## Data model
 
 `users` (phone, name, gender, language, passenger/driver status, suspension) · `strikes` ·
 `documents` (type, S3 key, status, expiry, review note) · `vehicles` · `trips` (origin/destination
 city + landmark + PostGIS point, departure, seats, price, preferences) · `bookings` (seats, status,
-payment method, total, commission) · `reviews` (1–5, one per author per booking).
+payment method, total, commission) · `reviews` (1–5, one per author per booking) · `device_tokens` (FCM token per phone).
 
 ## Roadmap
 
 1. ~~Flutter app → new backend~~ – done: Cognito sign-in/sign-up by SMS code, profile, documents, search, booking, publishing, my rides, reviews.
 2. ~~Admin dashboard~~ (`web/admin`) and ~~landing page~~ (`web/landing`) – done.
 3. Custom domain (e.g. cocorider.cm) for the websites and the API.
-4. **Push notifications** (booking requests, confirmations) via Firebase Cloud Messaging or SNS mobile push.
+4. ~~Push notifications~~ – done with Firebase Cloud Messaging (see below).
 5. **In-app chat**, then **live trip tracking / trip sharing** (planned for later).
 6. **Payments**: pick a Mobile Money aggregator; collect the commission (driver prepaid credit or passenger fee); yearly subscriptions.
 7. CI/CD (GitHub Actions: tests + `cdk deploy`).
