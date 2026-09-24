@@ -1,0 +1,28 @@
+{
+  "name": "coco-rider-infra",
+  "version": "0.1.0",
+  "private": true,
+  "bin": {
+    "coco-rider-infra": "bin/app.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "synth": "cdk synth",
+    "diff": "cdk diff",
+    "deploy": "cdk deploy"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.270.0",
+    "constructs": "^10.8.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.6.2",
+    "aws-cdk": "^2.1143.0",
+    "jest": "^30.5.2",
+    "ts-jest": "^29.4.13",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9"
+  }
+}
