@@ -1,4 +1,5 @@
 using CocoRider.Domain.Bookings;
+using CocoRider.Domain.Messaging;
 using CocoRider.Domain.Notifications;
 using CocoRider.Domain.Reviews;
 using CocoRider.Domain.Trips;
@@ -138,5 +139,21 @@ internal sealed class DeviceTokenConfiguration : IEntityTypeConfiguration<Device
         builder.HasIndex(d => d.Token).IsUnique();
         builder.HasIndex(d => d.UserId);
         builder.HasOne<User>().WithMany().HasForeignKey(d => d.UserId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+internal sealed class MessageConfiguration : IEntityTypeConfiguration<Message>
+{
+    public void Configure(EntityTypeBuilder<Message> builder)
+    {
+        builder.HasKey(m => m.Id);
+        builder.Property(m => m.Body).HasMaxLength(Message.MaxLength);
+        builder.HasOne<Booking>().WithMany().HasForeignKey(m => m.BookingId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<User>().WithMany().HasForeignKey(m => m.SenderId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<User>().WithMany().HasForeignKey(m => m.RecipientId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(m => new { m.BookingId, m.SentAt });
+
+        // Unread counters in the inbox.
+        builder.HasIndex(m => new { m.RecipientId, m.ReadAt });
     }
 }

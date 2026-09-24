@@ -156,16 +156,25 @@ to all their phones; tokens Firebase reports as invalid are deleted.
 | Trip cancelled by the driver | Passengers |
 | Trip completed ("rate your trip") | Passengers |
 | Document approved / refused by an admin | The user |
+| New chat message | The other participant |
 
 Tapping a notification opens the trip. FCM is free; without a service account key the API only
 logs the notifications.
+
+## Chat
+
+One conversation per booking, between the passenger and the driver (`/v1/bookings/{id}/messages`,
+inbox at `/v1/me/conversations`). Messages up to 1,000 characters; writing is allowed while the
+booking is pending or confirmed and after the trip, read-only once declined, cancelled or expired.
+The app polls for new messages every 5 s while a chat is open; otherwise a push notification
+announces them. Received messages are marked as read when the conversation is opened.
 
 ## Data model
 
 `users` (phone, name, gender, language, passenger/driver status, suspension) · `strikes` ·
 `documents` (type, S3 key, status, expiry, review note) · `vehicles` · `trips` (origin/destination
 city + landmark + PostGIS point, departure, seats, price, preferences) · `bookings` (seats, status,
-payment method, total, commission) · `reviews` (1–5, one per author per booking) · `device_tokens` (FCM token per phone).
+payment method, total, commission) · `reviews` (1–5, one per author per booking) · `device_tokens` (FCM token per phone) · `messages` (booking chat, read receipts).
 
 ## Roadmap
 
@@ -173,6 +182,6 @@ payment method, total, commission) · `reviews` (1–5, one per author per booki
 2. ~~Admin dashboard~~ (`web/admin`) and ~~landing page~~ (`web/landing`) – done.
 3. Custom domain (e.g. cocorider.cm) for the websites and the API.
 4. ~~Push notifications~~ – done with Firebase Cloud Messaging (see below).
-5. **In-app chat**, then **live trip tracking / trip sharing** (planned for later).
+5. ~~In-app chat~~ – done (see below). Next: **live trip tracking / trip sharing** (planned for later).
 6. **Payments**: pick a Mobile Money aggregator; collect the commission (driver prepaid credit or passenger fee); yearly subscriptions.
 7. CI/CD (GitHub Actions: tests + `cdk deploy`).

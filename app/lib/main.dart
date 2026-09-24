@@ -26,19 +26,24 @@ Future<void> main() async {
     onForeground: (event) => Get.snackbar(
       event.title ?? 'Coco Rider',
       event.body ?? '',
-      onTap: (_) => _openTrip(event.tripId),
+      onTap: (_) => _openFromNotification(event),
       duration: const Duration(seconds: 5),
     ),
-    onOpen: (event) => _openTrip(event.tripId),
+    onOpen: _openFromNotification,
   );
   Get.put(SessionController(auth: auth, api: api, push: push));
 
   runApp(const MyApp());
 }
 
-/// Notifications about a trip or a booking open the trip details.
-void _openTrip(String? tripId) {
-  if (tripId != null) Get.toNamed(CocoRoutes.keyTripDetailsPage, arguments: tripId);
+/// A message opens the chat; other notifications about a trip open the trip details.
+void _openFromNotification(PushEvent event) {
+  final bookingId = event.data['bookingId'];
+  if (event.data['kind'] == 'NewMessage' && bookingId != null) {
+    Get.toNamed(CocoRoutes.keyChatPage, arguments: bookingId);
+  } else if (event.tripId != null) {
+    Get.toNamed(CocoRoutes.keyTripDetailsPage, arguments: event.tripId);
+  }
 }
 
 class MyApp extends StatelessWidget {

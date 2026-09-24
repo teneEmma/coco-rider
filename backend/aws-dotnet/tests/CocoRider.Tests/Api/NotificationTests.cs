@@ -18,13 +18,11 @@ namespace CocoRider.Tests.Api;
 
 public class NotificationTests(ApiFactory api) : IClassFixture<ApiFactory>
 {
-    private static int _phone = 50_000;
-
     [Fact]
     public async Task Driver_and_passenger_are_notified_in_their_language()
     {
-        var driver = await SignUpAsync(Language.French, asDriver: true);
-        var passenger = await SignUpAsync(Language.English, asDriver: false);
+        var driver = await TestUsers.SignUpAsync(api, Language.French, asDriver: true);
+        var passenger = await TestUsers.SignUpAsync(api, Language.English, asDriver: false);
         await RegisterAsync(driver, "driver-phone");
         await RegisterAsync(passenger, "passenger-phone");
 
@@ -54,8 +52,8 @@ public class NotificationTests(ApiFactory api) : IClassFixture<ApiFactory>
     [Fact]
     public async Task Tokens_move_with_sign_in_and_invalid_ones_are_removed()
     {
-        var first = await SignUpAsync(Language.French, asDriver: false);
-        var second = await SignUpAsync(Language.French, asDriver: false);
+        var first = await TestUsers.SignUpAsync(api, Language.French, asDriver: false);
+        var second = await TestUsers.SignUpAsync(api, Language.French, asDriver: false);
 
         // The same phone is used by two accounts one after the other: it belongs to the last one.
         await RegisterAsync(first, "shared-phone");
@@ -92,23 +90,5 @@ public class NotificationTests(ApiFactory api) : IClassFixture<ApiFactory>
     {
         var response = await client.PutAsJsonAsync("/v1/me/devices", new RegisterDeviceRequest(token, DevicePlatform.Android), ApiFactory.Json);
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-    }
-
-    private async Task<HttpClient> SignUpAsync(Language language, bool asDriver)
-    {
-        var client = api.ClientFor($"sub-{Guid.NewGuid()}", $"+2376800{Interlocked.Increment(ref _phone):D5}");
-        await (await client.PutAsJsonAsync("/v1/me", new UpsertProfileRequest("Test", "User", Gender.Female, language), ApiFactory.Json))
-            .ReadAsync<ProfileResponse>();
-
-        var required = new VerificationRequirements();
-        foreach (var type in asDriver ? required.Driver : required.Passenger)
-        {
-            var created = await client.PostAsync<CocoRider.Api.Features.Documents.CreateDocumentResponse>("/v1/me/documents",
-                new CocoRider.Api.Features.Documents.CreateDocumentRequest(type, "image/jpeg"));
-            DateOnly? expiry = UserDocument.RequiresExpiryDate(type) ? new DateOnly(2028, 1, 1) : null;
-            await client.PostAsync<CocoRider.Api.Features.Documents.DocumentResponse>(
-                $"/v1/me/documents/{created.DocumentId}/submit", new CocoRider.Api.Features.Documents.SubmitDocumentRequest(expiry));
-        }
-        return client;
     }
 }

@@ -103,6 +103,12 @@ class _BookingTile extends StatelessWidget {
         crossAxisAlignment: WrapCrossAlignment.center,
         spacing: 8,
         children: [
+          if (booking.isActive || booking.status == BookingStatus.completed)
+            IconButton(
+              tooltip: 'chat.open'.tr,
+              icon: const Icon(Icons.chat_bubble_outline),
+              onPressed: () => Get.toNamed(CocoRoutes.keyChatPage, arguments: booking.id),
+            ),
           if (booking.driverPhone != null)
             IconButton(
               tooltip: 'booking.driverPhone'.tr,

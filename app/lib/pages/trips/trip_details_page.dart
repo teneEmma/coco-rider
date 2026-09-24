@@ -1,3 +1,4 @@
+import 'package:coco_rider/common/navigation/routes.dart';
 import 'package:coco_rider/common/utilities/formatters.dart';
 import 'package:coco_rider/common/utilities/utility_functions.dart';
 import 'package:coco_rider/common/widgets/async_view.dart';
@@ -240,6 +241,14 @@ class _DriverSection extends StatelessWidget {
                         FilledButton(onPressed: () => _run(() => api.acceptBooking(booking.id)), child: Text('driver.accept'.tr)),
                         OutlinedButton(onPressed: () => _run(() => api.rejectBooking(booking.id)), child: Text('driver.reject'.tr)),
                       ],
+                      if (booking.status == BookingStatus.pending ||
+                          booking.status == BookingStatus.confirmed ||
+                          booking.status == BookingStatus.completed)
+                        TextButton.icon(
+                          icon: const Icon(Icons.chat_bubble_outline),
+                          label: Text('chat.open'.tr),
+                          onPressed: () => Get.toNamed(CocoRoutes.keyChatPage, arguments: booking.id),
+                        ),
                       if (departed && (booking.status == BookingStatus.confirmed || booking.status == BookingStatus.completed))
                         TextButton(onPressed: () => _run(() => api.reportNoShow(booking.id)), child: Text('driver.noShow'.tr)),
                     ],

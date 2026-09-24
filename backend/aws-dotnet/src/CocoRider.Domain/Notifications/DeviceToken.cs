@@ -62,4 +62,7 @@ public enum NotificationKind
 
     DocumentApproved,
     DocumentRejected,
+
+    /// <summary>A chat message from the other participant of a booking.</summary>
+    NewMessage,
 }

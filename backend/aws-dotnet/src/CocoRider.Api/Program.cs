@@ -4,6 +4,7 @@ using CocoRider.Api.Errors;
 using CocoRider.Api.Features.Admin;
 using CocoRider.Api.Features.Bookings;
 using CocoRider.Api.Features.Documents;
+using CocoRider.Api.Features.Messaging;
 using CocoRider.Api.Features.Notifications;
 using CocoRider.Api.Features.Profile;
 using CocoRider.Api.Features.Reviews;
@@ -70,6 +71,7 @@ app.MapBookingEndpoints();
 app.MapReviewEndpoints();
 app.MapAdminEndpoints();
 app.MapDeviceEndpoints();
+app.MapMessageEndpoints();
 
 if (app.Environment.IsDevelopment() && app.Services.GetService<FakeDocumentStorage>() is { } fakeStorage)
 {

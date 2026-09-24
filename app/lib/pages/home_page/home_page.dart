@@ -1,5 +1,6 @@
 import 'package:coco_rider/common/widgets/responsive_layout.dart';
 import 'package:coco_rider/common/widgets/responsive_layout_controller.dart';
+import 'package:coco_rider/pages/chat/inbox_tab.dart';
 import 'package:coco_rider/pages/profile/profile_tab.dart';
 import 'package:coco_rider/pages/publish/publish_tab.dart';
 import 'package:coco_rider/pages/rides/rides_tab.dart';
@@ -17,7 +18,7 @@ class HomePage extends StatelessWidget {
     final content = Obx(() => switch (controller.navigationBarSelectedIndex.value) {
           1 => const PublishTab(),
           2 => const RidesTab(),
-          3 => const _InboxTab(),
+          3 => const InboxTab(),
           4 => const ProfileTab(),
           _ => const SearchTab(),
         });
@@ -26,24 +27,6 @@ class HomePage extends StatelessWidget {
       smallScreenWidget: content,
       mediumScreenWidget: content,
       largeScreenWidget: content,
-    );
-  }
-}
-
-class _InboxTab extends StatelessWidget {
-  const _InboxTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        children: [
-          const Icon(Icons.forum_outlined, size: 48),
-          const SizedBox(height: 12),
-          Text('inbox.soon'.tr, textAlign: TextAlign.center),
-        ],
-      ),
     );
   }
 }

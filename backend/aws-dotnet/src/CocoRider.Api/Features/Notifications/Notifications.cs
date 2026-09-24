@@ -1,6 +1,7 @@
 using System.Threading.Channels;
 using CocoRider.Api.Features.Trips;
 using CocoRider.Domain.Bookings;
+using CocoRider.Domain.Messaging;
 using CocoRider.Domain.Notifications;
 using CocoRider.Domain.Trips;
 using CocoRider.Domain.Users;
@@ -73,6 +74,14 @@ public sealed class Notifier(NotificationQueue queue)
                 ["reason"] = document.ReviewNote ?? "",
             }));
 
+    public void NewMessage(Message message, Trip trip, User sender) =>
+        queue.Enqueue(new(message.RecipientId, NotificationKind.NewMessage,
+            new Dictionary<string, string>
+            {
+                ["name"] = sender.FirstName,
+                ["text"] = message.Body.Length <= 140 ? message.Body : message.Body[..140] + "…",
+            }, trip.Id, message.BookingId));
+
     private void ToPassenger(Booking booking, Trip trip, NotificationKind kind) =>
         queue.Enqueue(new(booking.PassengerId, kind, TripArgs(trip), trip.Id, booking.Id));
 
@@ -105,6 +114,7 @@ public static class NotificationTexts
         [NotificationKind.ReviewRequest] = ("Comment s'est passé votre trajet ?", "Notez votre trajet {from} → {to}."),
         [NotificationKind.DocumentApproved] = ("Document accepté", "Votre document « {document} » a été accepté."),
         [NotificationKind.DocumentRejected] = ("Document refusé", "Votre document « {document} » a été refusé : {reason}"),
+        [NotificationKind.NewMessage] = ("Message de {name}", "{text}"),
     };
 
     private static readonly Dictionary<NotificationKind, (string Title, string Body)> English = new()
@@ -119,6 +129,7 @@ public static class NotificationTexts
         [NotificationKind.ReviewRequest] = ("How was your trip?", "Rate your trip {from} → {to}."),
         [NotificationKind.DocumentApproved] = ("Document approved", "Your document \"{document}\" was approved."),
         [NotificationKind.DocumentRejected] = ("Document refused", "Your document \"{document}\" was refused: {reason}"),
+        [NotificationKind.NewMessage] = ("Message from {name}", "{text}"),
     };
 
     private static readonly Dictionary<DocumentType, (string French, string English)> Documents = new()
@@ -140,6 +151,7 @@ public static class NotificationTexts
             var value = key == "document" && Enum.TryParse<DocumentType>(raw, out var type)
                 ? english ? Documents[type].English : Documents[type].French
                 : raw;
+            title = title.Replace($"{{{key}}}", value);
             body = body.Replace($"{{{key}}}", value);
         }
 

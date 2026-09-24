@@ -6,4 +6,5 @@ class CocoRoutes {
   static const keyProfileSetupPage = '/profile';
   static const keyDocumentsPage = '/documents';
   static const keyTripDetailsPage = '/trip';
+  static const keyChatPage = '/chat';
 }

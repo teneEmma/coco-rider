@@ -1,4 +1,5 @@
 using CocoRider.Domain.Bookings;
+using CocoRider.Domain.Messaging;
 using CocoRider.Domain.Notifications;
 using CocoRider.Domain.Reviews;
 using CocoRider.Domain.Trips;
@@ -19,6 +20,7 @@ public sealed class CocoRiderDbContext(DbContextOptions<CocoRiderDbContext> opti
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<DeviceToken> DeviceTokens => Set<DeviceToken>();
+    public DbSet<Message> Messages => Set<Message>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

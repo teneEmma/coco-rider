@@ -210,7 +210,13 @@ class AppStrings {
     'review.comment': 'Comment (optional)',
     'review.send': 'Send',
     'review.thanks': 'Thank you for your review',
-    'inbox.soon': 'Chat with drivers and passengers is coming soon.',
+    'inbox.empty': 'No messages yet. You can write to the driver or the passengers from a booking.',
+    'chat.hint': 'Write a message',
+    'chat.send': 'Send',
+    'chat.closed': 'This conversation is closed.',
+    'chat.open': 'Message',
+    'chat.read': 'Read',
+    'chat.privacy': 'Stay polite. Never share codes or pay before the trip.',
     'common.cancel': 'Cancel',
     'common.retry': 'Retry',
     'common.confirm': 'Confirm',
@@ -227,6 +233,8 @@ class AppStrings {
     'error.vehicle.plate_taken': 'This plate number is already registered.',
     'error.document.expired': 'This document is expired.',
     'error.network': 'No internet connection.',
+    'error.message.conversation_closed': 'This conversation is closed.',
+    'error.message.too_long': 'The message is too long.',
   };
 
   static const Map<String, String> fr = {
@@ -343,7 +351,13 @@ class AppStrings {
     'review.comment': 'Commentaire (facultatif)',
     'review.send': 'Envoyer',
     'review.thanks': 'Merci pour votre avis',
-    'inbox.soon': 'La messagerie avec les conducteurs et passagers arrive bientôt.',
+    'inbox.empty': "Pas encore de messages. Vous pouvez écrire au conducteur ou aux passagers depuis une réservation.",
+    'chat.hint': 'Écrire un message',
+    'chat.send': 'Envoyer',
+    'chat.closed': 'Cette conversation est fermée.',
+    'chat.open': 'Message',
+    'chat.read': 'Lu',
+    'chat.privacy': "Restez courtois. Ne partagez jamais de code et ne payez pas avant le trajet.",
     'common.cancel': 'Annuler',
     'common.retry': 'Réessayer',
     'common.confirm': 'Confirmer',
@@ -359,5 +373,7 @@ class AppStrings {
     'error.vehicle.plate_taken': "Ce numéro d'immatriculation est déjà enregistré.",
     'error.document.expired': 'Ce document est expiré.',
     'error.network': 'Pas de connexion internet.',
+    'error.message.conversation_closed': 'Cette conversation est fermée.',
+    'error.message.too_long': 'Le message est trop long.',
   };
 }

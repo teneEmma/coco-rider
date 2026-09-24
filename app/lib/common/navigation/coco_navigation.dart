@@ -1,6 +1,7 @@
 import 'package:coco_rider/common/navigation/routes.dart';
 import 'package:coco_rider/pages/authentication/otp_code_verification.dart';
 import 'package:coco_rider/pages/authentication/phone_authentication.dart';
+import 'package:coco_rider/pages/chat/chat_page.dart';
 import 'package:coco_rider/pages/documents/documents_page.dart';
 import 'package:coco_rider/pages/home_page/home_page.dart';
 import 'package:coco_rider/pages/profile/profile_setup_page.dart';
@@ -34,6 +35,11 @@ class CocoNavigation {
     GetPage(
       name: CocoRoutes.keyDocumentsPage,
       page: () => const DocumentsPage(),
+    ),
+    GetPage(
+      name: CocoRoutes.keyChatPage,
+      page: () => const ChatPage(),
+      arguments: String,
     ),
     GetPage(
       name: CocoRoutes.keyTripDetailsPage,

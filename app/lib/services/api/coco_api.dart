@@ -192,6 +192,19 @@ class CocoApi {
   Future<void> review(String bookingId, {required int rating, String? comment}) =>
       _send('POST', '/v1/bookings/$bookingId/reviews', {'rating': rating, 'comment': comment});
 
+  // ---------- Chat ----------
+
+  /// Messages of a booking's conversation; with [after], only the newer ones (used for polling).
+  Future<Conversation> getConversation(String bookingId, {DateTime? after}) async =>
+      Conversation.fromJson(await _send('GET', '/v1/bookings/$bookingId/messages', null,
+          after == null ? null : {'after': after.toUtc().toIso8601String()}));
+
+  Future<ChatMessage> sendMessage(String bookingId, String body) async =>
+      ChatMessage.fromJson(await _send('POST', '/v1/bookings/$bookingId/messages', {'body': body}));
+
+  Future<List<ConversationSummary>> getConversations() async =>
+      _list(await _send('GET', '/v1/me/conversations'), ConversationSummary.fromJson);
+
   // ---------- Push notifications ----------
 
   /// [platform] is "Android", "Ios" or "Web".

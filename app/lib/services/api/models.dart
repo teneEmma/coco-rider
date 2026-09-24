@@ -273,3 +273,65 @@ class Booking {
   bool get isActive =>
       status == BookingStatus.pending || status == BookingStatus.confirmed;
 }
+
+class ChatMessage {
+  final String id;
+  final bool fromMe;
+  final String body;
+  final DateTime sentAt;
+  final DateTime? readAt;
+
+  ChatMessage.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        fromMe = json['fromMe'],
+        body = json['body'],
+        sentAt = DateTime.parse(json['sentAt']),
+        readAt = _date(json['readAt']);
+}
+
+class Participant {
+  final String id;
+  final String firstName;
+
+  Participant.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        firstName = json['firstName'];
+}
+
+/// Messages of one booking's conversation.
+class Conversation {
+  final String bookingId;
+  final String tripId;
+  final Participant withUser;
+  final bool canWrite;
+  final List<ChatMessage> messages;
+
+  Conversation.fromJson(Map<String, dynamic> json)
+      : bookingId = json['bookingId'],
+        tripId = json['tripId'],
+        withUser = Participant.fromJson(json['with']),
+        canWrite = json['canWrite'],
+        messages = (json['messages'] as List).map((m) => ChatMessage.fromJson(m)).toList();
+}
+
+/// A line of the inbox.
+class ConversationSummary {
+  final String bookingId;
+  final String tripId;
+  final Participant withUser;
+  final String from;
+  final String to;
+  final DateTime departureAt;
+  final ChatMessage lastMessage;
+  final int unread;
+
+  ConversationSummary.fromJson(Map<String, dynamic> json)
+      : bookingId = json['bookingId'],
+        tripId = json['tripId'],
+        withUser = Participant.fromJson(json['with']),
+        from = json['from'],
+        to = json['to'],
+        departureAt = DateTime.parse(json['departureAt']),
+        lastMessage = ChatMessage.fromJson(json['lastMessage']),
+        unread = json['unread'];
+}
