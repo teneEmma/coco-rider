@@ -2,6 +2,7 @@ using CocoRider.Domain.Bookings;
 using CocoRider.Domain.Messaging;
 using CocoRider.Domain.Notifications;
 using CocoRider.Domain.Reviews;
+using CocoRider.Domain.Tracking;
 using CocoRider.Domain.Trips;
 using CocoRider.Domain.Users;
 using CocoRider.Domain.Vehicles;
@@ -155,5 +156,29 @@ internal sealed class MessageConfiguration : IEntityTypeConfiguration<Message>
 
         // Unread counters in the inbox.
         builder.HasIndex(m => new { m.RecipientId, m.ReadAt });
+    }
+}
+
+internal sealed class TripPositionConfiguration : IEntityTypeConfiguration<TripPosition>
+{
+    public void Configure(EntityTypeBuilder<TripPosition> builder)
+    {
+        builder.HasKey(p => p.TripId);
+        builder.Property(p => p.Point).HasColumnType("geography (point, 4326)");
+        builder.Ignore(p => p.Latitude);
+        builder.Ignore(p => p.Longitude);
+        builder.HasOne<Trip>().WithOne().HasForeignKey<TripPosition>(p => p.TripId).OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+internal sealed class TripShareConfiguration : IEntityTypeConfiguration<TripShare>
+{
+    public void Configure(EntityTypeBuilder<TripShare> builder)
+    {
+        builder.HasKey(s => s.Token);
+        builder.Property(s => s.Token).HasMaxLength(64);
+        builder.HasOne<Trip>().WithMany().HasForeignKey(s => s.TripId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne<User>().WithMany().HasForeignKey(s => s.CreatedById).OnDelete(DeleteBehavior.Cascade);
+        builder.HasIndex(s => s.TripId);
     }
 }

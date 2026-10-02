@@ -69,9 +69,9 @@ test('websites are private buckets behind CloudFront', () => {
   template.resourceCountIs('AWS::CloudFront::OriginAccessControl', 2);
 });
 
-test('only the admin dashboard origin may call the API from a browser', () => {
+test('only the two websites may call the API from a browser', () => {
   template.hasResourceProperties('AWS::ApiGatewayV2::Api', {
-    CorsConfiguration: Match.objectLike({ AllowOrigins: [Match.anyValue()] }),
+    CorsConfiguration: Match.objectLike({ AllowOrigins: [Match.anyValue(), Match.anyValue()] }),
   });
 });
 

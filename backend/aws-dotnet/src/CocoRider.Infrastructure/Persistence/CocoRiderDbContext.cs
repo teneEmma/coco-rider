@@ -2,6 +2,7 @@ using CocoRider.Domain.Bookings;
 using CocoRider.Domain.Messaging;
 using CocoRider.Domain.Notifications;
 using CocoRider.Domain.Reviews;
+using CocoRider.Domain.Tracking;
 using CocoRider.Domain.Trips;
 using CocoRider.Domain.Users;
 using CocoRider.Domain.Vehicles;
@@ -21,6 +22,8 @@ public sealed class CocoRiderDbContext(DbContextOptions<CocoRiderDbContext> opti
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<DeviceToken> DeviceTokens => Set<DeviceToken>();
     public DbSet<Message> Messages => Set<Message>();
+    public DbSet<TripPosition> TripPositions => Set<TripPosition>();
+    public DbSet<TripShare> TripShares => Set<TripShare>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

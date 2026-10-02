@@ -130,6 +130,11 @@ export class CocoRiderStack extends Stack {
       removalPolicy: RemovalPolicy.RETAIN,
     });
 
+    // ---------- Websites: admin dashboard and landing page (also shows shared trips at /suivi/{token}) ----------
+    const webDir = path.join(__dirname, '../../web');
+    const landing = new StaticSite(this, 'Landing', { buildDir: path.join(webDir, 'landing/dist') });
+    const admin = new StaticSite(this, 'Admin', { buildDir: path.join(webDir, 'admin/dist') });
+
     // ---------- API container ----------
     const cluster = new ecs.Cluster(this, 'Cluster', {
       vpc,
@@ -167,6 +172,7 @@ export class CocoRiderStack extends Stack {
         Storage__DocumentsBucket: documents.bucketName,
         Database__Name: 'cocorider',
         Database__MigrateOnStartup: 'true',
+        Tracking__PublicBaseUrl: landing.url,
       },
       secrets: {
         Database__Host: ecs.Secret.fromSecretsManager(dbSecret, 'host'),
@@ -207,11 +213,6 @@ export class CocoRiderStack extends Stack {
       },
     });
 
-    // ---------- Websites: admin dashboard and landing page ----------
-    const webDir = path.join(__dirname, '../../web');
-    const landing = new StaticSite(this, 'Landing', { buildDir: path.join(webDir, 'landing/dist') });
-    const admin = new StaticSite(this, 'Admin', { buildDir: path.join(webDir, 'admin/dist') });
-
     // ---------- Public entry point: API Gateway HTTP API ----------
     const vpcLink = new apigw.VpcLink(this, 'VpcLink', {
       vpc,
@@ -223,9 +224,10 @@ export class CocoRiderStack extends Stack {
       apiName: 'coco-rider-api',
       createDefaultStage: false,
       defaultIntegration: new integrations.HttpServiceDiscoveryIntegration('Api', service.cloudMapService!, { vpcLink }),
-      // The mobile app is not a browser; only the admin dashboard needs CORS.
+      // The mobile app is not a browser; only the websites need CORS
+      // (admin dashboard, and the landing page for shared trips).
       corsPreflight: {
-        allowOrigins: [admin.url],
+        allowOrigins: [admin.url, landing.url],
         allowMethods: [apigw.CorsHttpMethod.ANY],
         allowHeaders: ['authorization', 'content-type'],
         maxAge: Duration.hours(1),
@@ -261,7 +263,7 @@ export class CocoRiderStack extends Stack {
       });
     }
 
-    landing.publish();
+    landing.publish({ apiUrl: httpApi.apiEndpoint });
     admin.publish({
       apiUrl: httpApi.apiEndpoint,
       authMode: 'cognito',

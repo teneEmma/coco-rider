@@ -74,3 +74,10 @@ public class TripAndUserTests
     public void Plate_numbers_are_normalized(string input, string expected) =>
         Assert.Equal(expected, Vehicle.NormalizePlate(input));
 }
+
+public class GeoTests
+{
+    [Fact]
+    public void Douala_to_Yaounde_is_about_200_km_as_the_crow_flies() =>
+        Assert.InRange(CocoRider.Domain.Tracking.Geo.DistanceKm(4.0511, 9.7679, 3.8480, 11.5021), 190, 200);
+}

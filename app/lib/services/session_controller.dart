@@ -3,6 +3,7 @@ import 'package:coco_rider/services/api/coco_api.dart';
 import 'package:coco_rider/services/api/models.dart';
 import 'package:coco_rider/services/authentication/auth.dart';
 import 'package:coco_rider/services/notifications/push_notifications.dart';
+import 'package:coco_rider/services/tracking/position_sharing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -38,6 +39,7 @@ class SessionController extends GetxController {
   Future<void> logout() async {
     // Unregister the phone while the session is still valid.
     await push?.stop();
+    if (Get.isRegistered<PositionSharing>()) await Get.find<PositionSharing>().stop();
     await auth.logout();
     profile.value = null;
     Get.offAllNamed(CocoRoutes.keyAuthenticationPage);

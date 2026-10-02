@@ -6,6 +6,7 @@ import 'package:coco_rider/pages/documents/documents_page.dart';
 import 'package:coco_rider/pages/home_page/home_page.dart';
 import 'package:coco_rider/pages/profile/profile_setup_page.dart';
 import 'package:coco_rider/pages/start_page.dart';
+import 'package:coco_rider/pages/tracking/live_tracking_page.dart';
 import 'package:coco_rider/pages/trips/trip_details_page.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
 
@@ -35,6 +36,11 @@ class CocoNavigation {
     GetPage(
       name: CocoRoutes.keyDocumentsPage,
       page: () => const DocumentsPage(),
+    ),
+    GetPage(
+      name: CocoRoutes.keyTrackingPage,
+      page: () => const LiveTrackingPage(),
+      arguments: String,
     ),
     GetPage(
       name: CocoRoutes.keyChatPage,

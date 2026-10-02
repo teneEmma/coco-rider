@@ -65,4 +65,7 @@ public enum NotificationKind
 
     /// <summary>A chat message from the other participant of a booking.</summary>
     NewMessage,
+
+    /// <summary>To confirmed passengers: the driver started sharing their position.</summary>
+    TripStarted,
 }

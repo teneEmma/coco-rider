@@ -82,6 +82,12 @@ public sealed class Notifier(NotificationQueue queue)
                 ["text"] = message.Body.Length <= 140 ? message.Body : message.Body[..140] + "…",
             }, trip.Id, message.BookingId));
 
+    public void TripStarted(Trip trip, User driver, IEnumerable<Guid> passengerIds)
+    {
+        foreach (var passengerId in passengerIds)
+            queue.Enqueue(new(passengerId, NotificationKind.TripStarted, TripArgs(trip, ("name", driver.FirstName)), trip.Id));
+    }
+
     private void ToPassenger(Booking booking, Trip trip, NotificationKind kind) =>
         queue.Enqueue(new(booking.PassengerId, kind, TripArgs(trip), trip.Id, booking.Id));
 
@@ -115,6 +121,7 @@ public static class NotificationTexts
         [NotificationKind.DocumentApproved] = ("Document accepté", "Votre document « {document} » a été accepté."),
         [NotificationKind.DocumentRejected] = ("Document refusé", "Votre document « {document} » a été refusé : {reason}"),
         [NotificationKind.NewMessage] = ("Message de {name}", "{text}"),
+        [NotificationKind.TripStarted] = ("{name} est en route", "Suivez l'arrivée de votre conducteur pour {from} → {to} en direct."),
     };
 
     private static readonly Dictionary<NotificationKind, (string Title, string Body)> English = new()
@@ -130,6 +137,7 @@ public static class NotificationTexts
         [NotificationKind.DocumentApproved] = ("Document approved", "Your document \"{document}\" was approved."),
         [NotificationKind.DocumentRejected] = ("Document refused", "Your document \"{document}\" was refused: {reason}"),
         [NotificationKind.NewMessage] = ("Message from {name}", "{text}"),
+        [NotificationKind.TripStarted] = ("{name} is on the way", "Follow your driver live for {from} → {to}."),
     };
 
     private static readonly Dictionary<DocumentType, (string French, string English)> Documents = new()

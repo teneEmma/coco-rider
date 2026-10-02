@@ -125,3 +125,20 @@ a { color: var(--brand-text); }
 .cta .stores { justify-content: center; }
 
 .footer { text-align: center; padding: 2rem 16px; color: var(--text-muted); border-top: 1px solid var(--border); font-size: .9rem; }
+
+/* Shared trip page (/suivi/{token}) */
+.track { max-width: 720px; margin: 0 auto; padding: 1.5rem 16px 3rem; }
+.track h1 { font-size: 1.6rem; margin-bottom: .25rem; }
+.track-route { color: var(--text-muted); margin-bottom: 1rem; font-weight: 500; }
+.track-status { display: flex; align-items: center; gap: .5rem; font-weight: 600; margin: 0 0 .25rem; }
+.track-status.live { color: var(--brand-text); }
+.track-distance { margin-bottom: .75rem; }
+.pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 0 var(--brand); animation: pulse 1.6s infinite; }
+@keyframes pulse { 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+@media (prefers-reduced-motion: reduce) { .pulse { animation: none; } }
+.track-map { height: min(55vh, 420px); border-radius: 16px; border: 1px solid var(--border); margin: .75rem 0 1.25rem; z-index: 0; }
+.track-details { display: grid; grid-template-columns: max-content 1fr; gap: .4rem 1rem; margin: 0 0 1.25rem; }
+.track-details dt { color: var(--text-muted); }
+.track-details dd { margin: 0; }
+.plate { font-family: ui-monospace, monospace; font-weight: 700; letter-spacing: .08em; }
+.small { font-size: .9rem; }

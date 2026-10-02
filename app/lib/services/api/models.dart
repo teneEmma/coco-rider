@@ -335,3 +335,47 @@ class ConversationSummary {
         lastMessage = ChatMessage.fromJson(json['lastMessage']),
         unread = json['unread'];
 }
+
+/// The driver's latest position, as passengers see it.
+class LivePosition {
+  final double latitude;
+  final double longitude;
+  final double? heading;
+  final double? speedKmh;
+  final DateTime recordedAt;
+  final bool isLive;
+  final double distanceToDestinationKm;
+
+  LivePosition.fromJson(Map<String, dynamic> json)
+      : latitude = (json['latitude'] as num).toDouble(),
+        longitude = (json['longitude'] as num).toDouble(),
+        heading = (json['heading'] as num?)?.toDouble(),
+        speedKmh = (json['speedKmh'] as num?)?.toDouble(),
+        recordedAt = DateTime.parse(json['recordedAt']),
+        isLive = json['isLive'],
+        distanceToDestinationKm = (json['distanceToDestinationKm'] as num).toDouble();
+}
+
+class TripTracking {
+  final String tripId;
+  final TripStatus tripStatus;
+  final Place destination;
+
+  /// Null until the driver starts sharing, and after the trip.
+  final LivePosition? position;
+
+  TripTracking.fromJson(Map<String, dynamic> json)
+      : tripId = json['tripId'],
+        tripStatus = _enum(TripStatus.values, json['tripStatus']),
+        destination = Place.fromJson(json['destination']),
+        position = json['position'] == null ? null : LivePosition.fromJson(json['position']);
+}
+
+class ShareLink {
+  final Uri url;
+  final DateTime expiresAt;
+
+  ShareLink.fromJson(Map<String, dynamic> json)
+      : url = Uri.parse(json['url']),
+        expiresAt = DateTime.parse(json['expiresAt']);
+}

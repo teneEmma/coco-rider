@@ -62,6 +62,11 @@ public sealed class TripLifecycle(
             }
         }
 
+        // Positions are only kept while a trip is running.
+        await db.TripPositions
+            .Where(p => db.Trips.Any(t => t.Id == p.TripId && t.Status != TripStatus.Scheduled))
+            .ExecuteDeleteAsync(ct);
+
         if (expired > 0 || completed > 0)
             logger.LogInformation("Trip lifecycle: {Expired} requests expired, {Completed} trips completed", expired, completed);
 

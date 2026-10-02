@@ -109,6 +109,13 @@ class _BookingTile extends StatelessWidget {
               icon: const Icon(Icons.chat_bubble_outline),
               onPressed: () => Get.toNamed(CocoRoutes.keyChatPage, arguments: booking.id),
             ),
+          if (booking.status == BookingStatus.confirmed &&
+              DateTime.now().isAfter(booking.trip.departureAt.subtract(const Duration(hours: 1))))
+            IconButton(
+              tooltip: 'tracking.follow'.tr,
+              icon: const Icon(Icons.near_me_outlined),
+              onPressed: () => Get.toNamed(CocoRoutes.keyTrackingPage, arguments: booking.trip.id),
+            ),
           if (booking.driverPhone != null)
             IconButton(
               tooltip: 'booking.driverPhone'.tr,

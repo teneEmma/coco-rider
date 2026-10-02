@@ -169,12 +169,27 @@ booking is pending or confirmed and after the trip, read-only once declined, can
 The app polls for new messages every 5 s while a chat is open; otherwise a push notification
 announces them. Received messages are marked as read when the conversation is opened.
 
+## Live trip tracking and trip sharing
+
+- **Driver:** from 1 h before departure to 12 h after, "Share my position" sends the GPS position
+  every 15 s while the app is open (`PUT /v1/trips/{id}/position`). The first position notifies the
+  confirmed passengers ("Paul est en route"). Sharing with the screen off is planned later.
+- **Passengers** (confirmed bookings only) see a map refreshed every 10 s (`GET /v1/trips/{id}/position`):
+  live or "last position at…" after 2 min without update, and the distance to the destination as the crow flies.
+- **Relatives:** a passenger creates a link (`POST /v1/trips/{id}/shares`) and sends it by WhatsApp/SMS.
+  It opens `https://<landing>/suivi/{token}` without an account: driver's first name, car, plate, live map.
+  Links are unguessable (256-bit tokens) and expire 24 h after departure.
+- **Privacy:** only the latest position is stored, never a history; it is deleted when the trip ends.
+- **Maps:** OpenStreetMap tiles (free, no API key). OSM's tile usage policy suits the MVP; with real
+  traffic, switch to a paid tile provider (e.g. MapTiler, Stadia) by changing one URL.
+
 ## Data model
 
 `users` (phone, name, gender, language, passenger/driver status, suspension) · `strikes` ·
 `documents` (type, S3 key, status, expiry, review note) · `vehicles` · `trips` (origin/destination
 city + landmark + PostGIS point, departure, seats, price, preferences) · `bookings` (seats, status,
-payment method, total, commission) · `reviews` (1–5, one per author per booking) · `device_tokens` (FCM token per phone) · `messages` (booking chat, read receipts).
+payment method, total, commission) · `reviews` (1–5, one per author per booking) · `device_tokens` (FCM token per phone) · `messages` (booking chat, read receipts) ·
+`trip_positions` (latest driver position per running trip, no history) · `trip_shares` (links for relatives).
 
 ## Roadmap
 
@@ -182,6 +197,7 @@ payment method, total, commission) · `reviews` (1–5, one per author per booki
 2. ~~Admin dashboard~~ (`web/admin`) and ~~landing page~~ (`web/landing`) – done.
 3. Custom domain (e.g. cocorider.cm) for the websites and the API.
 4. ~~Push notifications~~ – done with Firebase Cloud Messaging (see below).
-5. ~~In-app chat~~ – done (see below). Next: **live trip tracking / trip sharing** (planned for later).
+5. ~~In-app chat~~ and ~~live trip tracking / trip sharing~~ – done (see above). Next for tracking:
+   sharing with the screen off (background location permission, needs store review), road distance and ETA.
 6. **Payments**: pick a Mobile Money aggregator; collect the commission (driver prepaid credit or passenger fee); yearly subscriptions.
 7. CI/CD (GitHub Actions: tests + `cdk deploy`).

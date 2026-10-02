@@ -9,6 +9,7 @@ import 'package:coco_rider/services/config/app_config.dart';
 import 'package:coco_rider/services/notifications/push_messaging.dart';
 import 'package:coco_rider/services/notifications/push_notifications.dart';
 import 'package:coco_rider/services/session_controller.dart';
+import 'package:coco_rider/services/tracking/position_sharing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
@@ -32,6 +33,7 @@ Future<void> main() async {
     onOpen: _openFromNotification,
   );
   Get.put(SessionController(auth: auth, api: api, push: push));
+  Get.put(PositionSharing(api: api, location: GeolocatorLocationProvider()));
 
   runApp(const MyApp());
 }
@@ -41,6 +43,8 @@ void _openFromNotification(PushEvent event) {
   final bookingId = event.data['bookingId'];
   if (event.data['kind'] == 'NewMessage' && bookingId != null) {
     Get.toNamed(CocoRoutes.keyChatPage, arguments: bookingId);
+  } else if (event.data['kind'] == 'TripStarted' && event.tripId != null) {
+    Get.toNamed(CocoRoutes.keyTrackingPage, arguments: event.tripId);
   } else if (event.tripId != null) {
     Get.toNamed(CocoRoutes.keyTripDetailsPage, arguments: event.tripId);
   }

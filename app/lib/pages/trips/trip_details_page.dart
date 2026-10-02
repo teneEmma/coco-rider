@@ -7,6 +7,7 @@ import 'package:coco_rider/pages/rides/booking_status_chip.dart';
 import 'package:coco_rider/services/api/coco_api.dart';
 import 'package:coco_rider/services/api/models.dart';
 import 'package:coco_rider/services/session_controller.dart';
+import 'package:coco_rider/services/tracking/position_sharing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -258,6 +259,7 @@ class _DriverSection extends StatelessWidget {
             ),
           ),
         const SizedBox(height: 16),
+        if (trip.status == TripStatus.scheduled && _inSharingWindow(trip)) _PositionSharingCard(tripId: trip.id),
         if (trip.status == TripStatus.scheduled && departed)
           FilledButton(onPressed: () => _run(() => api.completeTrip(trip.id)), child: Text('driver.completeTrip'.tr)),
         if (trip.status == TripStatus.scheduled && !departed) ...[
@@ -282,6 +284,64 @@ class _DriverSection extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// Sharing opens one hour before departure and closes 12 hours after (as on the server).
+bool _inSharingWindow(Trip trip) {
+  final now = DateTime.now();
+  return now.isAfter(trip.departureAt.subtract(const Duration(hours: 1))) &&
+      now.isBefore(trip.departureAt.add(const Duration(hours: 12)));
+}
+
+/// Driver: start or stop sharing the position with the passengers.
+class _PositionSharingCard extends StatelessWidget {
+  final String tripId;
+
+  const _PositionSharingCard({required this.tripId});
+
+  @override
+  Widget build(BuildContext context) {
+    final PositionSharing sharing = Get.find();
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Obx(() {
+          final active = sharing.isSharing(tripId);
+          final lastSent = sharing.lastSentAt.value;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(children: [
+                Icon(active ? Icons.gps_fixed : Icons.gps_off, color: active ? const Color(0xFF1F7A0F) : null),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(active && lastSent != null
+                      ? 'tracking.sharing'.trParams({'time': Formatters.time(lastSent)})
+                      : 'tracking.keepOpen'.tr),
+                ),
+              ]),
+              if (sharing.error.value != null) ...[
+                const SizedBox(height: 6),
+                Text(sharing.error.value!, style: const TextStyle(color: CocoColors.keyError)),
+              ],
+              const SizedBox(height: 10),
+              active
+                  ? OutlinedButton.icon(
+                      icon: const Icon(Icons.stop_circle_outlined),
+                      label: Text('tracking.stop'.tr),
+                      onPressed: sharing.stop,
+                    )
+                  : FilledButton.icon(
+                      icon: const Icon(Icons.share_location),
+                      label: Text('tracking.start'.tr),
+                      onPressed: () => sharing.start(tripId),
+                    ),
+            ],
+          );
+        }),
+      ),
     );
   }
 }

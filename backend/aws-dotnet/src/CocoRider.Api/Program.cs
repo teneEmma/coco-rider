@@ -8,6 +8,7 @@ using CocoRider.Api.Features.Messaging;
 using CocoRider.Api.Features.Notifications;
 using CocoRider.Api.Features.Profile;
 using CocoRider.Api.Features.Reviews;
+using CocoRider.Api.Features.Tracking;
 using CocoRider.Api.Features.Trips;
 using CocoRider.Api.Features.Vehicles;
 using CocoRider.Domain.Common;
@@ -29,6 +30,7 @@ builder.Services.AddScoped<VerificationService>();
 builder.Services.AddScoped<TripReader>();
 builder.Services.Configure<LifecycleOptions>(builder.Configuration.GetSection("Lifecycle"));
 builder.Services.AddScoped<TripLifecycle>();
+builder.Services.Configure<TrackingOptions>(builder.Configuration.GetSection("Tracking"));
 builder.Services.AddHostedService<TripLifecycleService>();
 builder.Services.AddSingleton<NotificationQueue>();
 builder.Services.AddSingleton<Notifier>();
@@ -72,6 +74,7 @@ app.MapReviewEndpoints();
 app.MapAdminEndpoints();
 app.MapDeviceEndpoints();
 app.MapMessageEndpoints();
+app.MapTrackingEndpoints();
 
 if (app.Environment.IsDevelopment() && app.Services.GetService<FakeDocumentStorage>() is { } fakeStorage)
 {

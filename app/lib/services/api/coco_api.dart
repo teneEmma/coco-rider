@@ -205,6 +205,27 @@ class CocoApi {
   Future<List<ConversationSummary>> getConversations() async =>
       _list(await _send('GET', '/v1/me/conversations'), ConversationSummary.fromJson);
 
+  // ---------- Live tracking ----------
+
+  /// Sent by the driver's phone every few seconds while sharing.
+  Future<void> updatePosition(String tripId,
+          {required double latitude, required double longitude, double? heading, double? speedKmh, required DateTime recordedAt}) =>
+      _send('PUT', '/v1/trips/$tripId/position', {
+        'latitude': latitude,
+        'longitude': longitude,
+        'heading': heading,
+        'speedKmh': speedKmh,
+        'recordedAt': recordedAt.toUtc().toIso8601String(),
+      });
+
+  Future<void> stopSharingPosition(String tripId) => _send('DELETE', '/v1/trips/$tripId/position');
+
+  Future<TripTracking> getTracking(String tripId) async =>
+      TripTracking.fromJson(await _send('GET', '/v1/trips/$tripId/position'));
+
+  /// A link relatives can open without the app.
+  Future<ShareLink> shareTrip(String tripId) async => ShareLink.fromJson(await _send('POST', '/v1/trips/$tripId/shares'));
+
   // ---------- Push notifications ----------
 
   /// [platform] is "Android", "Ios" or "Web".
