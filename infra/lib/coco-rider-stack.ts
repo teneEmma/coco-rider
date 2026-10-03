@@ -278,6 +278,8 @@ export class CocoRiderStack extends Stack {
     new CfnOutput(this, 'AdminClientId', { value: adminClient.userPoolClientId });
     new CfnOutput(this, 'DocumentsBucket', { value: documents.bucketName });
     new CfnOutput(this, 'FcmSecretName', { value: fcmServiceAccount.secretName });
+    new CfnOutput(this, 'ApiClusterName', { value: cluster.clusterName });
+    new CfnOutput(this, 'ApiServiceName', { value: service.serviceName });
     new CfnOutput(this, 'AdminUrl', { value: admin.url });
     new CfnOutput(this, 'LandingUrl', { value: landing.url });
   }

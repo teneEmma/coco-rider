@@ -14,7 +14,7 @@ namespace CocoRider.Api.Features.Tracking;
 public sealed class TrackingOptions
 {
     /// <summary>Public website (landing page) that shows shared trips at /suivi/{token}.</summary>
-    public string PublicBaseUrl { get; set; } = "http://localhost:5173";
+    public string PublicBaseUrl { get; set; } = "http://localhost:5174";
 }
 
 public sealed record UpdatePositionRequest(double Latitude, double Longitude, double? Heading, double? SpeedKmh, DateTimeOffset RecordedAt);

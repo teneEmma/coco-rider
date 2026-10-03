@@ -10,3 +10,6 @@ Carpooling app for Cameroon: private drivers and clandos share the cost of inter
 | `infra/` | AWS infrastructure (CDK, TypeScript) |
 | `backend/functions/`, `firebase.json` | Previous Firebase backend (no longer used by the app) |
 | `docs/architecture.md` | Architecture, costs, business rules, API |
+
+**Start here:** [docs/getting-started.md](docs/getting-started.md) – run everything locally, then deploy to AWS.
+Demo data for local runs: `node scripts/seed-demo.mjs`.

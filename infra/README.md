@@ -3,6 +3,7 @@
 One stack (`CocoRider`) with everything the API needs: VPC without NAT, RDS PostgreSQL, S3 documents
 bucket, Cognito user pool (phone + SMS), ECS Fargate service, API Gateway HTTP API, monthly budget.
 Costs and design choices: [docs/architecture.md](../docs/architecture.md).
+Step-by-step guide (AWS account, credentials, first admin, SMS sandbox): [docs/getting-started.md](../docs/getting-started.md).
 
 ## First deployment
 
@@ -26,7 +27,8 @@ After the first deployment:
 4. **Push notifications**: in the Firebase console (project `coco-rider-dev`) → Project settings → Service
    accounts → *Generate new private key*. Paste the whole JSON file into the Secrets Manager secret
    `coco-rider/fcm-service-account` (output `FcmSecretName`), then restart the API:
-   `aws ecs update-service --cluster <cluster> --service <service> --force-new-deployment`.
+   `aws ecs update-service --cluster <ApiClusterName> --service <ApiServiceName> --force-new-deployment`
+   (both names are stack outputs).
    For iOS, also upload an APNs key in Firebase → Project settings → Cloud Messaging.
 
 ## Everyday commands
