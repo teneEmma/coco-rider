@@ -56,6 +56,15 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
             client.DefaultRequestHeaders.Add("X-Dev-Groups", "admin");
         return client;
     }
+
+    /// <summary>A client authenticated as a Cognito user who signed in with an email code (no verified phone).</summary>
+    public HttpClient EmailClientFor(string sub, string email)
+    {
+        var client = CreateClient();
+        client.DefaultRequestHeaders.Add("X-Dev-User", sub);
+        client.DefaultRequestHeaders.Add("X-Dev-Email", email);
+        return client;
+    }
 }
 
 internal static class HttpExtensions

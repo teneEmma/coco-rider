@@ -11,12 +11,12 @@ Carpooling for Cameroon: private drivers (and clandos) share the cost of interci
 | Websites | React: landing page in `web/landing`, admin dashboard in `web/admin`, both on S3 + CloudFront |
 | Backend | C# / ASP.NET Core (.NET 10), one container on ECS Fargate (ARM) – `backend/aws-dotnet` |
 | Database | PostgreSQL 16 + PostGIS on RDS (db.t4g.micro) |
-| Auth | Amazon Cognito, sign-in with phone number + SMS code |
+| Auth | Amazon Cognito, sign-in with phone number + SMS code, or email + emailed code (sent through Amazon SES) |
 | Documents | Private S3 bucket, automatic checks with Amazon Rekognition, admin review queue for doubtful cases |
 | Infrastructure as code | AWS CDK (TypeScript) – `infra/` |
 | Region | `eu-west-1` (Ireland) – see [Region](#region) |
 | Payments | No money goes through the app yet: the passenger pays the driver (cash, MTN MoMo, Orange Money). The commission owed is recorded on each booking (0% while free) |
-| Old Firebase backend | The app no longer uses Firebase; `backend/functions` is kept for reference and can be deleted |
+| Firebase | Only Cloud Messaging (push notifications); the old Firebase backend was removed |
 
 ## Architecture
 
@@ -32,7 +32,10 @@ Carpooling for Cameroon: private drivers (and clandos) share the cost of interci
                                                         Flutter app ┘
 ```
 
-* The app signs in with Cognito and sends the **ID token** (it holds the verified phone number) as `Authorization: Bearer …`.
+* The app signs in with Cognito and sends the **ID token** (it holds the verified phone number or email) as `Authorization: Bearer …`.
+* Users who sign in by email type their phone number in their profile: it is stored as **not verified by SMS**
+  (`phoneVerified: false`) and can be corrected later; an SMS-verified number cannot be changed. The API only
+  trusts a token's phone number when `phone_number_verified` is true.
 * Photos of documents never go through the API: the API returns a pre-signed S3 URL, the app uploads, then calls `submit`.
 * Everything runs in public/isolated subnets **without a NAT Gateway or load balancer** (the two most common budget killers).
 
@@ -92,7 +95,6 @@ Ask a lawyer whether storing ID documents in Ireland requires a declaration or a
 | Seats are held while a request is pending; no overbooking even with simultaneous bookings | `Trip.ReserveSeats` + PostgreSQL `xmin` concurrency token | – |
 | A request the driver has not answered by departure expires and frees its seats | `TripLifecycle` (every 5 min) | `Lifecycle:IntervalMinutes` |
 | A trip the driver forgot to complete is closed 12 h after departure, so passengers can review | `Trip.AutoComplete` | `Policy:AutoCompleteAfterHours` |
-| Women-only trips: published by women, visible and bookable by women only | `Trip.Publish`, `Booking.Request`, search | – |
 | Phone numbers are revealed only once a booking is confirmed | trip/booking responses | – |
 | Trip published at least 30 min before departure, max 100,000 FCFA per seat | `Trip.Publish` | `Policy:MinimumMinutesBeforeDeparture` |
 
@@ -128,7 +130,7 @@ All endpoints require a Cognito ID token except `/health`. Errors are RFC 7807 J
 | POST | `/v1/me/documents/{id}/submit` | run the automatic checks |
 | GET/POST/DELETE | `/v1/me/vehicles[/{id}]` | driver's vehicles |
 | POST | `/v1/trips` | publish (verified drivers) |
-| GET | `/v1/trips/search?date=&fromCity=&toCity=` or `&fromLat=&fromLng=&toLat=&toLng=&radiusKm=` | search |
+| GET | `/v1/trips/search?fromCity=&toCity=` or `?fromLat=&fromLng=&toLat=&toLng=&radiusKm=`, optional `&date=&seats=` | search (upcoming trips; no date = all, soonest first) |
 | GET | `/v1/trips/{id}` | details (+ bookings for the driver) |
 | POST | `/v1/trips/{id}/cancel`, `/complete` | driver |
 | GET | `/v1/me/trips?past=` | driver's trips |
@@ -185,7 +187,7 @@ announces them. Received messages are marked as read when the conversation is op
 
 ## Data model
 
-`users` (phone, name, gender, language, passenger/driver status, suspension) · `strikes` ·
+`users` (phone, email, name, language, passenger/driver status, suspension) · `strikes` ·
 `documents` (type, S3 key, status, expiry, review note) · `vehicles` · `trips` (origin/destination
 city + landmark + PostGIS point, departure, seats, price, preferences) · `bookings` (seats, status,
 payment method, total, commission) · `reviews` (1–5, one per author per booking) · `device_tokens` (FCM token per phone) · `messages` (booking chat, read receipts) ·

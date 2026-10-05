@@ -23,7 +23,7 @@ In Development there is no Cognito: authenticate with headers, and uploads/check
 ```bash
 curl -X PUT http://localhost:5200/v1/me \
   -H 'X-Dev-User: user-1' -H 'X-Dev-Phone: +237690000001' -H 'Content-Type: application/json' \
-  -d '{"firstName":"Ama","lastName":"Tchoua","gender":"Female","language":"French"}'
+  -d '{"firstName":"Ama","lastName":"Tchoua","language":"French"}'
 ```
 
 Add `-H 'X-Dev-Groups: admin'` to call `/v1/admin/*`.

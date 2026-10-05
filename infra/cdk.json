@@ -8,6 +8,7 @@
     "region": "eu-west-1",
     "budgetEmail": "",
     "monthlyBudgetUsd": 100,
+    "senderEmail": "",
     "@aws-cdk/aws-ecs:enableImdsBlockingDeprecatedFeature": false,
     "@aws-cdk/core:checkSecretUsage": true,
     "@aws-cdk/aws-iam:minimizePolicies": true

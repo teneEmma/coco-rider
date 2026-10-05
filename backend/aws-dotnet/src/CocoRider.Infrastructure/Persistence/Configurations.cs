@@ -19,11 +19,13 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(u => u.Id);
         builder.Property(u => u.CognitoSub).HasMaxLength(64);
         builder.Property(u => u.PhoneNumber).HasMaxLength(20);
+        builder.Property(u => u.Email).HasMaxLength(254);
         builder.Property(u => u.FirstName).HasMaxLength(100);
         builder.Property(u => u.LastName).HasMaxLength(100);
         builder.Property(u => u.SuspensionReason).HasMaxLength(500);
         builder.HasIndex(u => u.CognitoSub).IsUnique();
         builder.HasIndex(u => u.PhoneNumber).IsUnique();
+        builder.HasIndex(u => u.Email).IsUnique().HasFilter("email IS NOT NULL");
 
         builder.HasMany(u => u.Strikes).WithOne().HasForeignKey(s => s.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.Navigation(u => u.Strikes).UsePropertyAccessMode(PropertyAccessMode.Field);

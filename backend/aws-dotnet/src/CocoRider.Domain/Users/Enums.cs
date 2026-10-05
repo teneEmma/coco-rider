@@ -6,13 +6,6 @@ public enum Language
     English,
 }
 
-public enum Gender
-{
-    Unspecified,
-    Female,
-    Male,
-}
-
 /// <summary>A user is verified separately as a passenger and as a driver.</summary>
 public enum VerificationRole
 {

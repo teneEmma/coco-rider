@@ -22,6 +22,11 @@ export interface CocoRiderStackProps extends StackProps {
   /** Receives the budget alerts at 80% and 100% of the monthly budget. Empty = no budget. */
   readonly budgetEmail?: string;
   readonly monthlyBudgetUsd: number;
+  /**
+   * Address the sign-in codes are emailed from; it must be verified in Amazon SES (same region).
+   * Empty = email sign-in is turned off (Cognito only sends email codes through SES).
+   */
+  readonly senderEmail?: string;
 }
 
 const API_PORT = 8080;
@@ -85,16 +90,28 @@ export class CocoRiderStack extends Stack {
       ],
     });
 
-    // ---------- Authentication: phone number + SMS code ----------
+    // ---------- Authentication: phone number + SMS code, or email + emailed code ----------
+    // Email users type their phone number in their profile (the API stores it as unverified).
+    const emailSignIn = !!props.senderEmail;
     const userPool = new cognito.UserPool(this, 'Users', {
       userPoolName: 'coco-rider-users',
       featurePlan: cognito.FeaturePlan.ESSENTIALS,
       selfSignUpEnabled: true,
-      signInAliases: { phone: true },
-      autoVerify: { phone: true },
-      signInPolicy: { allowedFirstAuthFactors: { password: true, smsOtp: true } },
-      standardAttributes: { phoneNumber: { required: true, mutable: false } },
-      accountRecovery: cognito.AccountRecovery.PHONE_ONLY_WITHOUT_MFA,
+      signInAliases: { phone: true, email: true },
+      autoVerify: { phone: true, email: true },
+      signInPolicy: { allowedFirstAuthFactors: { password: true, smsOtp: true, emailOtp: emailSignIn } },
+      standardAttributes: {
+        phoneNumber: { required: false, mutable: true },
+        email: { required: false, mutable: true },
+      },
+      userVerification: {
+        emailSubject: 'Coco Rider : votre code / your code',
+        emailBody: 'Votre code Coco Rider / Your Coco Rider code: {####}',
+      },
+      email: emailSignIn
+        ? cognito.UserPoolEmail.withSES({ fromEmail: props.senderEmail!, fromName: 'Coco Rider', sesRegion: this.region })
+        : undefined,
+      accountRecovery: cognito.AccountRecovery.PHONE_WITHOUT_MFA_AND_EMAIL,
       mfa: cognito.Mfa.OFF,
       removalPolicy: RemovalPolicy.RETAIN,
     });

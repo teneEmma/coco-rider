@@ -13,7 +13,18 @@ public sealed class CurrentUser(IHttpContextAccessor accessor, CocoRiderDbContex
     public string Sub => Context.User.FindFirst(Claims.Subject)?.Value
         ?? throw new InvalidOperationException("The token has no subject.");
 
-    public string? PhoneNumber => Context.User.FindFirst(Claims.Phone)?.Value;
+    /// <summary>
+    /// The phone number, only once Cognito has verified it by SMS. An email user could add an
+    /// unverified number to their Cognito account; it must not count as verified here.
+    /// </summary>
+    public string? PhoneNumber => Context.User.FindFirst(Claims.PhoneVerified)?.Value == "true"
+        ? Context.User.FindFirst(Claims.Phone)?.Value
+        : null;
+
+    /// <summary>The email address, only once Cognito has verified it (email sign-in).</summary>
+    public string? Email => Context.User.FindFirst(Claims.EmailVerified)?.Value == "true"
+        ? Context.User.FindFirst(Claims.Email)?.Value
+        : null;
 
     public bool IsAdmin => Context.User.HasClaim(Claims.Groups, Claims.AdminGroup);
 

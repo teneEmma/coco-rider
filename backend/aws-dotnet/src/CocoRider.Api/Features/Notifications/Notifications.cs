@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Threading.Channels;
 using CocoRider.Api.Features.Trips;
 using CocoRider.Domain.Bookings;
@@ -97,7 +98,7 @@ public sealed class Notifier(NotificationQueue queue)
         {
             ["from"] = trip.Origin.City,
             ["to"] = trip.Destination.City,
-            ["date"] = trip.DepartureAt.ToOffset(TripEndpoints.CameroonOffset).ToString("dd/MM HH:mm"),
+            ["date"] = trip.DepartureAt.ToOffset(TripEndpoints.CameroonOffset).ToString("dd/MM HH:mm", CultureInfo.InvariantCulture),
         };
         foreach (var (key, value) in extra)
             args[key] = value;

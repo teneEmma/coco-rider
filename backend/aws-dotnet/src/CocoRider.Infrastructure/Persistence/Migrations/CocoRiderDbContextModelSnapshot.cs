@@ -22,6 +22,7 @@ namespace CocoRider.Infrastructure.Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "unaccent");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("CocoRider.Domain.Bookings.Booking", b =>
@@ -365,10 +366,6 @@ namespace CocoRider.Infrastructure.Persistence.Migrations
                         .HasColumnType("xid")
                         .HasColumnName("xmin");
 
-                    b.Property<bool>("WomenOnly")
-                        .HasColumnType("boolean")
-                        .HasColumnName("women_only");
-
                     b.HasKey("Id")
                         .HasName("pk_trips");
 
@@ -441,17 +438,16 @@ namespace CocoRider.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("driver_status");
 
+                    b.Property<string>("Email")
+                        .HasMaxLength(254)
+                        .HasColumnType("character varying(254)")
+                        .HasColumnName("email");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("first_name");
-
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("gender");
 
                     b.Property<string>("Language")
                         .IsRequired()
@@ -477,6 +473,10 @@ namespace CocoRider.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("phone_number");
 
+                    b.Property<bool>("PhoneVerified")
+                        .HasColumnType("boolean")
+                        .HasColumnName("phone_verified");
+
                     b.Property<DateTimeOffset?>("SuspendedUntil")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("suspended_until");
@@ -492,6 +492,11 @@ namespace CocoRider.Infrastructure.Persistence.Migrations
                     b.HasIndex("CognitoSub")
                         .IsUnique()
                         .HasDatabaseName("ix_users_cognito_sub");
+
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_email")
+                        .HasFilter("email IS NOT NULL");
 
                     b.HasIndex("PhoneNumber")
                         .IsUnique()

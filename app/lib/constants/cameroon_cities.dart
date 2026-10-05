@@ -28,6 +28,24 @@ class CameroonCities {
     CameroonCity('Maroua', 10.5956, 14.3247),
   ];
 
+  /// The city whose centre is closest to the position (flat-earth approximation, fine at this scale).
+  static CameroonCity nearest(double latitude, double longitude) {
+    double distance(CameroonCity c) {
+      final dLat = c.latitude - latitude;
+      final dLng = (c.longitude - longitude) * 0.99; // cos(~8°N), Cameroon's mid latitude
+      return dLat * dLat + dLng * dLng;
+    }
+
+    return all.reduce((a, b) => distance(a) <= distance(b) ? a : b);
+  }
+
+  static const _accents = {'à': 'a', 'â': 'a', 'ä': 'a', 'ç': 'c', 'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
+    'î': 'i', 'ï': 'i', 'ô': 'o', 'ö': 'o', 'ù': 'u', 'û': 'u', 'ü': 'u'};
+
+  /// "Yaoundé" → "yaounde", to compare city names whatever the case and accents (as the API does).
+  static String fold(String text) =>
+      text.trim().toLowerCase().split('').map((c) => _accents[c] ?? c).join();
+
   static CameroonCity? byName(String name) {
     for (final city in all) {
       if (city.name.toLowerCase() == name.trim().toLowerCase()) return city;

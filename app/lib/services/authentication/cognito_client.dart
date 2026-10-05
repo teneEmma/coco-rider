@@ -57,15 +57,25 @@ enum CognitoChallenge {
   signUp,
 }
 
-/// A code was sent by SMS; keep this to confirm it.
+/// Where the one-time code is sent.
+enum SignInChannel {
+  /// SMS to a phone number (the username is the E.164 number).
+  phone,
+
+  /// Email (the username is the email address).
+  email,
+}
+
+/// A code was sent by SMS or email; keep this to confirm it.
 class PendingCode {
   final CognitoChallenge challenge;
   final String? session;
+  final SignInChannel channel;
 
-  PendingCode(this.challenge, this.session);
+  PendingCode(this.challenge, this.session, [this.channel = SignInChannel.phone]);
 }
 
-/// Passwordless sign-in and sign-up with an SMS code, through the Cognito API.
+/// Passwordless sign-in and sign-up with a code sent by SMS or email, through the Cognito API.
 /// Public app clients need no request signing, so plain HTTP calls are enough.
 class CognitoClient {
   final String region;
@@ -80,65 +90,75 @@ class CognitoClient {
 
   Uri get _endpoint => Uri.parse('https://cognito-idp.$region.amazonaws.com/');
 
-  /// Sends an SMS code. New phone numbers are registered on the fly.
-  Future<PendingCode> sendCode(String phoneNumber) async {
+  /// Sends a code by SMS (phone number) or email. New users are registered on the fly.
+  Future<PendingCode> sendCode(String username,
+      {SignInChannel channel = SignInChannel.phone}) async {
+    final challenge = _challengeName(channel);
     try {
       final response = await _call('InitiateAuth', {
         'AuthFlow': 'USER_AUTH',
         'ClientId': clientId,
         'AuthParameters': {
-          'USERNAME': phoneNumber,
-          'PREFERRED_CHALLENGE': 'SMS_OTP',
+          'USERNAME': username,
+          'PREFERRED_CHALLENGE': challenge,
         },
       });
-      if (response['ChallengeName'] != 'SMS_OTP') {
+      if (response['ChallengeName'] != challenge) {
         throw CognitoException(
             'UnexpectedChallenge', '${response['ChallengeName']}');
       }
-      return PendingCode(CognitoChallenge.signIn, response['Session'] as String);
+      return PendingCode(
+          CognitoChallenge.signIn, response['Session'] as String, channel);
     } on CognitoException catch (e) {
       if (e.type != 'UserNotFoundException') rethrow;
     }
 
     await _call('SignUp', {
       'ClientId': clientId,
-      'Username': phoneNumber,
+      'Username': username,
       'UserAttributes': [
-        {'Name': 'phone_number', 'Value': phoneNumber},
+        {
+          'Name': channel == SignInChannel.email ? 'email' : 'phone_number',
+          'Value': username,
+        },
       ],
     });
-    return PendingCode(CognitoChallenge.signUp, null);
+    return PendingCode(CognitoChallenge.signUp, null, channel);
   }
 
   Future<CognitoTokens> confirmCode(
-      String phoneNumber, PendingCode pending, String code) async {
+      String username, PendingCode pending, String code) async {
     if (pending.challenge == CognitoChallenge.signIn) {
+      final challenge = _challengeName(pending.channel);
       final response = await _call('RespondToAuthChallenge', {
-        'ChallengeName': 'SMS_OTP',
+        'ChallengeName': challenge,
         'ClientId': clientId,
         'Session': pending.session,
         'ChallengeResponses': {
-          'USERNAME': phoneNumber,
-          'SMS_OTP_CODE': code,
+          'USERNAME': username,
+          '${challenge}_CODE': code,
         },
       });
       return _tokens(response['AuthenticationResult'], null);
     }
 
-    // Sign-up: confirming the phone number returns a session that signs the user in directly.
+    // Sign-up: confirming the phone number or email returns a session that signs the user in directly.
     final confirmed = await _call('ConfirmSignUp', {
       'ClientId': clientId,
-      'Username': phoneNumber,
+      'Username': username,
       'ConfirmationCode': code,
     });
     final response = await _call('InitiateAuth', {
       'AuthFlow': 'USER_AUTH',
       'ClientId': clientId,
       'Session': confirmed['Session'],
-      'AuthParameters': {'USERNAME': phoneNumber},
+      'AuthParameters': {'USERNAME': username},
     });
     return _tokens(response['AuthenticationResult'], null);
   }
+
+  static String _challengeName(SignInChannel channel) =>
+      channel == SignInChannel.email ? 'EMAIL_OTP' : 'SMS_OTP';
 
   Future<CognitoTokens> refresh(String refreshToken) async {
     final response = await _call('InitiateAuth', {

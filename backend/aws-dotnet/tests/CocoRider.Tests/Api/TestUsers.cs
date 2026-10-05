@@ -17,7 +17,7 @@ internal static class TestUsers
     public static async Task<HttpClient> SignUpAsync(ApiFactory api, Language language, bool asDriver, string firstName = "Test")
     {
         var client = api.ClientFor($"sub-{Guid.NewGuid()}", $"+2376800{Interlocked.Increment(ref _phone):D5}");
-        await (await client.PutAsJsonAsync("/v1/me", new UpsertProfileRequest(firstName, "User", Gender.Female, language), ApiFactory.Json))
+        await (await client.PutAsJsonAsync("/v1/me", new UpsertProfileRequest(firstName, "User", language), ApiFactory.Json))
             .ReadAsync<ProfileResponse>();
 
         var required = new VerificationRequirements();
@@ -40,6 +40,6 @@ internal static class TestUsers
             vehicle.Id, TripKind.Intercity,
             new LocationDto("Douala", "Ndokoti", 4.05, 9.77), new LocationDto("Yaoundé", "Mvan", 3.85, 11.50),
             departure, 3, 5000,
-            WomenOnly: false, LuggageAllowed: true, SmokingAllowed: false, InstantBooking: instantBooking, Notes: null));
+            LuggageAllowed: true, SmokingAllowed: false, InstantBooking: instantBooking, Notes: null));
     }
 }

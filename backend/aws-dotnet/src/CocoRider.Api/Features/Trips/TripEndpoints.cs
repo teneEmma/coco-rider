@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using CocoRider.Api.Auth;
 using CocoRider.Api.Features.Documents;
 using CocoRider.Api.Features.Notifications;
@@ -43,7 +45,7 @@ public static class TripEndpoints
 
         var trip = Trip.Publish(driver, vehicle, request.Kind, request.Origin.ToDomain(), request.Destination.ToDomain(),
             request.DepartureAt, request.Seats, request.PricePerSeatXaf,
-            new TripPreferences(request.WomenOnly, request.LuggageAllowed, request.SmokingAllowed, request.InstantBooking),
+            new TripPreferences(request.LuggageAllowed, request.SmokingAllowed, request.InstantBooking),
             request.Notes, clock.GetUtcNow(), policy.Value);
 
         db.Trips.Add(trip);
@@ -52,24 +54,28 @@ public static class TripEndpoints
     }
 
     /// <summary>
-    /// Finds scheduled trips on a given day. Either coordinates (with a radius, for city commutes)
-    /// or city names (for intercity trips) can be used for each end.
+    /// Finds upcoming scheduled trips. Every criterion is an optional filter: a day (otherwise all
+    /// upcoming trips, soonest first), a number of seats (otherwise 1), and for each end either
+    /// coordinates (with a radius, for city commutes) or a city name (for intercity trips).
     /// </summary>
     private static async Task<IEnumerable<TripResponse>> SearchAsync(
-        DateOnly date,
+        DateOnly? date,
         double? fromLat, double? fromLng, double? toLat, double? toLng, double? radiusKm,
         string? fromCity, string? toCity, int? seats, TripKind? kind,
         CurrentUser current, CocoRiderDbContext db, TripReader reader, TimeProvider clock, CancellationToken ct)
     {
         var now = clock.GetUtcNow();
-        var dayStart = new DateTimeOffset(date.ToDateTime(TimeOnly.MinValue), CameroonOffset).ToUniversalTime();
-        var dayEnd = dayStart.AddDays(1);
         var minSeats = Math.Max(1, seats ?? 1);
         var radiusMeters = Math.Clamp(radiusKm ?? DefaultRadiusKm, 0.1, MaxRadiusKm) * 1000;
 
-        var query = db.Trips.Where(t => t.Status == TripStatus.Scheduled
-            && t.DepartureAt >= dayStart && t.DepartureAt < dayEnd && t.DepartureAt > now
-            && t.SeatsAvailable >= minSeats);
+        var query = db.Trips.Where(t => t.Status == TripStatus.Scheduled && t.DepartureAt > now && t.SeatsAvailable >= minSeats);
+
+        if (date is { } day)
+        {
+            var dayStart = new DateTimeOffset(day.ToDateTime(TimeOnly.MinValue), CameroonOffset).ToUniversalTime();
+            var dayEnd = dayStart.AddDays(1);
+            query = query.Where(t => t.DepartureAt >= dayStart && t.DepartureAt < dayEnd);
+        }
 
         if (kind is { } k)
             query = query.Where(t => t.Kind == k);
@@ -81,8 +87,8 @@ public static class TripEndpoints
         }
         else if (!string.IsNullOrWhiteSpace(fromCity))
         {
-            var city = fromCity.Trim().ToLower();
-            query = query.Where(t => t.Origin.City.ToLower() == city);
+            var city = CityKey(fromCity);
+            query = query.Where(t => EF.Functions.Unaccent(t.Origin.City.ToLower()) == city);
         }
 
         if (toLat is { } tLat && toLng is { } tLng)
@@ -92,17 +98,23 @@ public static class TripEndpoints
         }
         else if (!string.IsNullOrWhiteSpace(toCity))
         {
-            var city = toCity.Trim().ToLower();
-            query = query.Where(t => t.Destination.City.ToLower() == city);
+            var city = CityKey(toCity);
+            query = query.Where(t => EF.Functions.Unaccent(t.Destination.City.ToLower()) == city);
         }
-
-        // Women-only trips are only shown to women.
-        var caller = await current.FindProfileAsync(ct);
-        if (caller?.Gender != Gender.Female)
-            query = query.Where(t => !t.WomenOnly);
 
         var trips = await query.OrderBy(t => t.DepartureAt).Take(MaxSearchResults).ToListAsync(ct);
         return await reader.ToResponsesAsync(trips, ct);
+    }
+
+    /// <summary>
+    /// "Yaoundé", "yaounde" and "YAOUNDÉ" → "yaounde". Compared with PostgreSQL's unaccent(lower(city)),
+    /// so typing a city without its accents still finds the trips.
+    /// </summary>
+    internal static string CityKey(string city)
+    {
+        var decomposed = city.Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD);
+        var withoutMarks = decomposed.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark);
+        return new string(withoutMarks.ToArray()).Normalize(NormalizationForm.FormC);
     }
 
     private static async Task<TripDetailsResponse> GetAsync(Guid id, CurrentUser current, CocoRiderDbContext db, TripReader reader, CancellationToken ct)
@@ -164,23 +176,24 @@ public static class TripEndpoints
             return await reader.ToResponseAsync(trip, ct);
         });
 
-    private static async Task<TripResponse> CompleteAsync(Guid id, CurrentUser current, CocoRiderDbContext db, TripReader reader,
-        Notifier notifier, TimeProvider clock, CancellationToken ct)
-    {
-        var driver = await current.RequireProfileAsync(ct);
-        var trip = await FindTripAsync(db, id, ct);
-        var now = clock.GetUtcNow();
+    private static Task<TripResponse> CompleteAsync(Guid id, CurrentUser current, CocoRiderDbContext db, TripReader reader,
+        Notifier notifier, TimeProvider clock, CancellationToken ct) =>
+        Concurrency.RetryAsync(db, async () =>
+        {
+            var driver = await current.RequireProfileAsync(ct);
+            var trip = await FindTripAsync(db, id, ct);
+            var now = clock.GetUtcNow();
 
-        trip.Complete(driver.Id, now);
-        var affected = await db.Bookings
-            .Where(b => b.TripId == trip.Id && (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed))
-            .ToListAsync(ct);
-        affected.ForEach(b => b.CompleteWithTrip(now));
+            trip.Complete(driver.Id, now);
+            var affected = await db.Bookings
+                .Where(b => b.TripId == trip.Id && (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed))
+                .ToListAsync(ct);
+            affected.ForEach(b => b.CompleteWithTrip(now));
 
-        await db.SaveChangesAsync(ct);
-        notifier.TripOutcome(trip, affected);
-        return await reader.ToResponseAsync(trip, ct);
-    }
+            await db.SaveChangesAsync(ct);
+            notifier.TripOutcome(trip, affected);
+            return await reader.ToResponseAsync(trip, ct);
+        });
 
     internal static async Task<Trip> FindTripAsync(CocoRiderDbContext db, Guid id, CancellationToken ct) =>
         await db.Trips.FirstOrDefaultAsync(t => t.Id == id, ct)

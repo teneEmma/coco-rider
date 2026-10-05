@@ -9,10 +9,16 @@ class AuthUser {
   /// Provider user id (Cognito "sub").
   final String uid;
 
-  /// E.164 phone number, e.g. +237690000000.
+  /// E.164 phone number, e.g. +237690000000. Empty for users who signed in by email.
   final String phoneNumber;
 
-  const AuthUser({required this.uid, required this.phoneNumber});
+  /// Email address, for users who signed in by email.
+  final String? email;
+
+  const AuthUser({required this.uid, required this.phoneNumber, this.email});
+
+  /// True when the user signed in by email: their profile must ask for a phone number.
+  bool get signedInWithEmail => phoneNumber.isEmpty && email != null;
 }
 
 /// Service that provides Authentication implementation to the app.
@@ -65,8 +71,14 @@ abstract class BaseAuthentication {
     PhoneNumberAuthenticationParameter param,
   );
 
+  /// Sends a one-time code to an email address (sign-in, or sign-up for a new address).
+  Future<AuthenticationResponse> authenticateWithEmail(
+    EmailAuthenticationParameter param,
+  );
+
   /// Attempts to verify the authenticity of the OTP code which has been
-  /// sent to a user.
+  /// sent to a user. [phoneNumber] is the phone number or the email address
+  /// the code was sent to.
   ///
   /// [verificationSuccessful] Response sent when the OTP code is correct.
   ///
@@ -106,12 +118,25 @@ class PhoneNumberAuthenticationParameter {
   });
 }
 
+/// The parameter to provide for email authentication.
+class EmailAuthenticationParameter {
+  final String email;
+  final Function onVerificationCodeSent;
+  final Function(String) onVerificationFailed;
+
+  EmailAuthenticationParameter({
+    required this.email,
+    required this.onVerificationCodeSent,
+    required this.onVerificationFailed,
+  });
+}
+
 /// Supported authentication backend types.
 enum AuthType {
-  /// Amazon Cognito: phone number + SMS code (production).
+  /// Amazon Cognito: phone number + SMS code, or email + emailed code (production).
   cognito,
 
-  /// Local API in development mode: no SMS, the code is always 123456.
+  /// Local API in development mode: no SMS or email, the code is always 123456.
   development,
 
   /// Fake auth implementation for testing.

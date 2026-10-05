@@ -20,7 +20,7 @@ public enum TripStatus
     Completed,
 }
 
-public sealed record TripPreferences(bool WomenOnly, bool LuggageAllowed, bool SmokingAllowed, bool InstantBooking);
+public sealed record TripPreferences(bool LuggageAllowed, bool SmokingAllowed, bool InstantBooking);
 
 public sealed class Trip
 {
@@ -42,7 +42,6 @@ public sealed class Trip
         SeatsTotal = seats;
         SeatsAvailable = seats;
         PricePerSeatXaf = pricePerSeatXaf;
-        WomenOnly = preferences.WomenOnly;
         LuggageAllowed = preferences.LuggageAllowed;
         SmokingAllowed = preferences.SmokingAllowed;
         InstantBooking = preferences.InstantBooking;
@@ -64,7 +63,6 @@ public sealed class Trip
     /// <summary>Price in FCFA (XAF has no minor unit).</summary>
     public long PricePerSeatXaf { get; private set; }
 
-    public bool WomenOnly { get; private set; }
     public bool LuggageAllowed { get; private set; }
     public bool SmokingAllowed { get; private set; }
 
@@ -93,8 +91,6 @@ public sealed class Trip
             throw new DomainException("trip.invalid_seats", $"Seats must be between 1 and {vehicle.PassengerSeats}.");
         if (pricePerSeatXaf is <= 0 or > MaxPricePerSeatXaf)
             throw new DomainException("trip.invalid_price", $"The price per seat must be between 1 and {MaxPricePerSeatXaf} FCFA.");
-        if (preferences.WomenOnly && driver.Gender != Gender.Female)
-            throw new DomainException("trip.women_only_requires_female_driver", "Only female drivers can publish women-only trips.");
 
         return new Trip(driver.Id, vehicle.Id, kind, origin, destination, departureAt, seats, pricePerSeatXaf, preferences, notes, now);
     }

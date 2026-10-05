@@ -13,8 +13,6 @@ String apiName(Enum value) =>
 DateTime? _date(Object? json) =>
     json == null ? null : DateTime.parse(json as String);
 
-enum Gender { unspecified, female, male }
-
 enum Language { french, english }
 
 enum VerificationStatus { incomplete, manualReview, verified, rejected }
@@ -65,9 +63,12 @@ class RoleVerification {
 class Profile {
   final String id;
   final String phoneNumber;
+
+  /// False when the user signed in by email and typed this number.
+  final bool phoneVerified;
+  final String? email;
   final String firstName;
   final String lastName;
-  final Gender gender;
   final Language language;
   final RoleVerification passenger;
   final RoleVerification driver;
@@ -76,9 +77,10 @@ class Profile {
   Profile.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         phoneNumber = json['phoneNumber'],
+        phoneVerified = json['phoneVerified'] ?? true,
+        email = json['email'],
         firstName = json['firstName'],
         lastName = json['lastName'],
-        gender = _enum(Gender.values, json['gender']),
         language = _enum(Language.values, json['language']),
         passenger = RoleVerification.fromJson(json['passenger']),
         driver = RoleVerification.fromJson(json['driver']),
@@ -185,7 +187,6 @@ class Trip {
   final int seatsTotal;
   final int seatsAvailable;
   final int pricePerSeatXaf;
-  final bool womenOnly;
   final bool luggageAllowed;
   final bool smokingAllowed;
   final bool instantBooking;
@@ -203,7 +204,6 @@ class Trip {
         seatsTotal = json['seatsTotal'],
         seatsAvailable = json['seatsAvailable'],
         pricePerSeatXaf = json['pricePerSeatXaf'],
-        womenOnly = json['womenOnly'],
         luggageAllowed = json['luggageAllowed'],
         smokingAllowed = json['smokingAllowed'],
         instantBooking = json['instantBooking'],

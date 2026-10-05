@@ -44,6 +44,14 @@ class AuthFakeImplementation implements BaseAuthentication {
   }
 
   @override
+  Future<AuthenticationResponse> authenticateWithEmail(
+    EmailAuthenticationParameter param,
+  ) async {
+    param.onVerificationCodeSent();
+    return AuthenticationResponse.verificationSuccessful;
+  }
+
+  @override
   Future<AuthenticationResponse> authenticateWithOTPCode(
     String phoneNumber,
     String otpCode, {
@@ -51,7 +59,9 @@ class AuthFakeImplementation implements BaseAuthentication {
     required Function(String) onVerificationFailed,
   }) async {
     if (otpCode == _testSmsCode) {
-      _user = AuthUser(uid: _uid ?? 'fake-user', phoneNumber: phoneNumber);
+      _user = phoneNumber.contains('@')
+          ? AuthUser(uid: _uid ?? 'fake-user', phoneNumber: '', email: phoneNumber)
+          : AuthUser(uid: _uid ?? 'fake-user', phoneNumber: phoneNumber);
       onVerificationCompleted();
 
       return AuthenticationResponse.verificationSuccessful;

@@ -22,10 +22,10 @@ public class CarpoolingFlowTests(ApiFactory api) : IClassFixture<ApiFactory>
     [Fact]
     public async Task Driver_publishes_and_passenger_books_an_intercity_trip()
     {
-        var (driver, _) = await SignUpAsync(Gender.Male, asDriver: true);
+        var (driver, _) = await SignUpAsync(asDriver: true);
         var trip = await PublishDoualaYaoundeAsync(driver, seats: 3, departure: api.Clock.GetUtcNow().AddDays(2));
 
-        var (passenger, _) = await SignUpAsync(Gender.Female, asDriver: false);
+        var (passenger, _) = await SignUpAsync(asDriver: false);
 
         // Intercity search by city name, and by GPS position within 5 km of Ndokoti.
         var date = DateOnly.FromDateTime(trip.DepartureAt.ToOffset(TripEndpoints.CameroonOffset).DateTime);
@@ -39,6 +39,19 @@ public class CarpoolingFlowTests(ApiFactory api) : IClassFixture<ApiFactory>
         Assert.Contains(byCity!, t => t.Id == trip.Id);
         Assert.Contains(byGps!, t => t.Id == trip.Id);
         Assert.DoesNotContain(farAway!, t => t.Id == trip.Id);
+
+        // Date and seats are optional filters: without them every upcoming trip matches.
+        var anyDay = await passenger.GetFromJsonAsync<List<TripResponse>>(
+            "/v1/trips/search?fromCity=Douala&toCity=Yaoundé", ApiFactory.Json);
+        var otherDay = await passenger.GetFromJsonAsync<List<TripResponse>>(
+            $"/v1/trips/search?date={date.AddDays(1):yyyy-MM-dd}&fromCity=Douala", ApiFactory.Json);
+        Assert.Contains(anyDay!, t => t.Id == trip.Id);
+
+        // Accents and case do not matter.
+        var noAccents = await passenger.GetFromJsonAsync<List<TripResponse>>(
+            "/v1/trips/search?fromCity=DOUALA&toCity=Yaounde", ApiFactory.Json);
+        Assert.Contains(noAccents!, t => t.Id == trip.Id);
+        Assert.DoesNotContain(otherDay!, t => t.Id == trip.Id);
 
         var booking = await passenger.PostAsync<BookingResponse>($"/v1/trips/{trip.Id}/bookings",
             new CreateBookingRequest(2, PaymentMethod.OrangeMoney));
@@ -55,9 +68,9 @@ public class CarpoolingFlowTests(ApiFactory api) : IClassFixture<ApiFactory>
     [Fact]
     public async Task Booking_cannot_be_cancelled_within_24_hours()
     {
-        var (driver, _) = await SignUpAsync(Gender.Male, asDriver: true);
+        var (driver, _) = await SignUpAsync(asDriver: true);
         var trip = await PublishDoualaYaoundeAsync(driver, seats: 2, departure: api.Clock.GetUtcNow().AddHours(20));
-        var (passenger, _) = await SignUpAsync(Gender.Male, asDriver: false);
+        var (passenger, _) = await SignUpAsync(asDriver: false);
         var booking = await passenger.PostAsync<BookingResponse>($"/v1/trips/{trip.Id}/bookings",
             new CreateBookingRequest(1, PaymentMethod.Cash));
 
@@ -70,12 +83,12 @@ public class CarpoolingFlowTests(ApiFactory api) : IClassFixture<ApiFactory>
     [Fact]
     public async Task Last_seat_goes_to_exactly_one_passenger()
     {
-        var (driver, _) = await SignUpAsync(Gender.Male, asDriver: true);
+        var (driver, _) = await SignUpAsync(asDriver: true);
         var trip = await PublishDoualaYaoundeAsync(driver, seats: 1, departure: api.Clock.GetUtcNow().AddDays(3));
 
         var passengers = new List<HttpClient>();
         for (var i = 0; i < 4; i++)
-            passengers.Add((await SignUpAsync(Gender.Male, asDriver: false)).Client);
+            passengers.Add((await SignUpAsync(asDriver: false)).Client);
 
         var responses = await Task.WhenAll(passengers.Select(p =>
             p.PostAsJsonAsync($"/v1/trips/{trip.Id}/bookings", new CreateBookingRequest(1, PaymentMethod.Cash), ApiFactory.Json)));
@@ -91,7 +104,7 @@ public class CarpoolingFlowTests(ApiFactory api) : IClassFixture<ApiFactory>
     [Fact]
     public async Task Unverified_user_cannot_publish_a_trip()
     {
-        var (client, _) = await SignUpAsync(Gender.Male, asDriver: false);
+        var (client, _) = await SignUpAsync(asDriver: false);
         var vehicle = await client.PostAsync<VehicleResponse>("/v1/me/vehicles",
             new CreateVehicleRequest("Toyota", "Yaris", "Rouge", NextPlate(), 4));
 
@@ -104,7 +117,7 @@ public class CarpoolingFlowTests(ApiFactory api) : IClassFixture<ApiFactory>
     [Fact]
     public async Task Admin_endpoints_require_the_admin_group()
     {
-        var (user, _) = await SignUpAsync(Gender.Male, asDriver: false);
+        var (user, _) = await SignUpAsync(asDriver: false);
         Assert.Equal(HttpStatusCode.Forbidden, (await user.GetAsync("/v1/admin/stats")).StatusCode);
 
         var admin = api.ClientFor("admin-sub", NextPhone(), admin: true);
@@ -117,14 +130,14 @@ public class CarpoolingFlowTests(ApiFactory api) : IClassFixture<ApiFactory>
     [Fact]
     public async Task Unanswered_requests_expire_and_forgotten_trips_complete()
     {
-        var (driver, _) = await SignUpAsync(Gender.Male, asDriver: true);
+        var (driver, _) = await SignUpAsync(asDriver: true);
         var vehicle = await driver.PostAsync<VehicleResponse>("/v1/me/vehicles",
             new CreateVehicleRequest("Toyota", "Corolla", "Grise", NextPlate(), 4));
         var onRequest = await driver.PostAsync<TripResponse>("/v1/trips",
             NewTrip(vehicle.Id, 2, api.Clock.GetUtcNow().AddHours(2)) with { InstantBooking = false });
         var instant = await driver.PostAsync<TripResponse>("/v1/trips", NewTrip(vehicle.Id, 2, api.Clock.GetUtcNow().AddHours(2)));
 
-        var (passenger, _) = await SignUpAsync(Gender.Female, asDriver: false);
+        var (passenger, _) = await SignUpAsync(asDriver: false);
         var request = await passenger.PostAsync<BookingResponse>($"/v1/trips/{onRequest.Id}/bookings", new CreateBookingRequest(1, PaymentMethod.Cash));
         var confirmed = await passenger.PostAsync<BookingResponse>($"/v1/trips/{instant.Id}/bookings", new CreateBookingRequest(1, PaymentMethod.Cash));
         Assert.Equal(BookingStatus.Pending, request.Status);
@@ -160,11 +173,11 @@ public class CarpoolingFlowTests(ApiFactory api) : IClassFixture<ApiFactory>
         return await scope.ServiceProvider.GetRequiredService<TripLifecycle>().RunAsync(CancellationToken.None);
     }
 
-    private async Task<(HttpClient Client, ProfileResponse Profile)> SignUpAsync(Gender gender, bool asDriver)
+    private async Task<(HttpClient Client, ProfileResponse Profile)> SignUpAsync(bool asDriver)
     {
         var client = api.ClientFor($"sub-{Guid.NewGuid()}", NextPhone());
         await (await client.PutAsJsonAsync("/v1/me",
-            new UpsertProfileRequest("Test", "User", gender, Language.French), ApiFactory.Json)).ReadAsync<ProfileResponse>();
+            new UpsertProfileRequest("Test", "User", Language.French), ApiFactory.Json)).ReadAsync<ProfileResponse>();
 
         var required = new VerificationRequirements();
         foreach (var type in asDriver ? required.Driver : required.Passenger)
@@ -191,7 +204,7 @@ public class CarpoolingFlowTests(ApiFactory api) : IClassFixture<ApiFactory>
         vehicleId, TripKind.Intercity,
         new LocationDto("Douala", "Carrefour Ndokoti", 4.0511, 9.7679),
         new LocationDto("Yaoundé", "Total Mvan", 3.8480, 11.5021),
-        departure, seats, 5000, WomenOnly: false, LuggageAllowed: true, SmokingAllowed: false, InstantBooking: true, Notes: null);
+        departure, seats, 5000, LuggageAllowed: true, SmokingAllowed: false, InstantBooking: true, Notes: null);
 
     private static string NextPhone() => $"+2376900{Interlocked.Increment(ref _phoneCounter):D5}";
 

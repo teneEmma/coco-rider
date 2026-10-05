@@ -24,6 +24,9 @@ class Formatters {
 
   static String day(DateTime date) => DateFormat('EEE d MMM y', _locale).format(date);
 
+  /// "lun. 12 oct.", for compact pickers.
+  static String shortDay(DateTime date) => DateFormat('EEE d MMM', _locale).format(date);
+
   static String time(DateTime utc) => DateFormat('HH:mm', _locale).format(toCameroonTime(utc));
 
   /// Translates an error for a snackbar: API codes have their own message, the rest is generic.

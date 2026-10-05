@@ -26,7 +26,7 @@ public sealed class TripReader(CocoRiderDbContext db)
             var rating = ratings.GetValueOrDefault(t.DriverId);
             var vehicle = vehicles[t.VehicleId];
             return new TripResponse(t.Id, t.Kind, t.Status, LocationDto.From(t.Origin), LocationDto.From(t.Destination),
-                t.DepartureAt, t.SeatsTotal, t.SeatsAvailable, t.PricePerSeatXaf, t.WomenOnly, t.LuggageAllowed,
+                t.DepartureAt, t.SeatsTotal, t.SeatsAvailable, t.PricePerSeatXaf, t.LuggageAllowed,
                 t.SmokingAllowed, t.InstantBooking, t.Notes,
                 new DriverSummary(t.DriverId, drivers[t.DriverId], rating?.Average, rating?.Count ?? 0),
                 new VehicleSummary(vehicle.Make, vehicle.Model, vehicle.Color));

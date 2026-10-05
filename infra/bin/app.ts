@@ -11,5 +11,6 @@ new CocoRiderStack(app, 'CocoRider', {
   },
   budgetEmail: app.node.tryGetContext('budgetEmail'),
   monthlyBudgetUsd: Number(app.node.tryGetContext('monthlyBudgetUsd') ?? 100),
+  senderEmail: app.node.tryGetContext('senderEmail'),
   tags: { project: 'coco-rider' },
 });

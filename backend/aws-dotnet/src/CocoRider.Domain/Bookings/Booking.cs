@@ -65,8 +65,6 @@ public sealed class Booking
             throw new DomainException("booking.own_trip", "You cannot book your own trip.");
         if (trip.HasDeparted(now))
             throw new DomainException("booking.trip_departed", "This trip has already departed.");
-        if (trip.WomenOnly && passenger.Gender != Gender.Female)
-            throw new DomainException("booking.women_only", "This trip is reserved for women.");
         if (seats is < 1 or > MaxSeatsPerBooking)
             throw new DomainException("booking.invalid_seats", $"You can book between 1 and {MaxSeatsPerBooking} seats.");
 

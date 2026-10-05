@@ -32,7 +32,7 @@ public class NotificationTests(ApiFactory api) : IClassFixture<ApiFactory>
             vehicle.Id, TripKind.Intercity,
             new LocationDto("Douala", "Ndokoti", 4.05, 9.77), new LocationDto("Yaoundé", "Mvan", 3.85, 11.50),
             new DateTimeOffset(2026, 10, 5, 6, 30, 0, TimeSpan.Zero), 3, 5000,
-            WomenOnly: false, LuggageAllowed: true, SmokingAllowed: false, InstantBooking: false, Notes: null));
+            LuggageAllowed: true, SmokingAllowed: false, InstantBooking: false, Notes: null));
 
         var booking = await passenger.PostAsync<BookingResponse>($"/v1/trips/{trip.Id}/bookings", new CreateBookingRequest(2, PaymentMethod.Cash));
 

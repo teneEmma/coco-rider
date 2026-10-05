@@ -16,7 +16,6 @@ Map<String, dynamic> tripJson({String id = 'trip-1', int seatsAvailable = 2}) =>
       'seatsTotal': 3,
       'seatsAvailable': seatsAvailable,
       'pricePerSeatXaf': 5000,
-      'womenOnly': false,
       'luggageAllowed': true,
       'smokingAllowed': false,
       'instantBooking': true,

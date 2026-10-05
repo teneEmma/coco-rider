@@ -2,7 +2,7 @@
 
 Coco Rider connects drivers and passengers in Cameroon to share the cost of
 intercity trips and daily commutes. The app talks to the AWS backend in
-`backend/aws-dotnet` (sign-in with Amazon Cognito: phone number + SMS code).
+`backend/aws-dotnet` (sign-in with Amazon Cognito: phone number + SMS code, or email + emailed code).
 
 #### Getting Started
 
@@ -44,7 +44,10 @@ If none are shown, follow the device-specific instructions on the
 [Install](https://flutter.dev/docs/get-started/install) page for your OS.
 
 Run the app against the **local API** (see `backend/aws-dotnet/README.md`).
-No SMS is sent: any phone number works with the code `123456`.
+No SMS or email is sent: any phone number or email address works with the code `123456`.
+
+The app uses Flutter **3.47.5**, pinned with [fvm](https://fvm.app) in `.fvmrc`: run `fvm flutter …`
+in this folder (in Rider, set the Flutter SDK path to `app/.fvm/flutter_sdk`).
 
 ```
 flutter run --dart-define=COCO_API_URL=http://10.0.2.2:5200   # Android emulator

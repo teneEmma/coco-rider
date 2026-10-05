@@ -8,13 +8,17 @@ public sealed class User
 
     private User() { }
 
-    public User(string cognitoSub, string phoneNumber, string firstName, string lastName, Gender gender, Language language, DateTimeOffset now)
+    /// <param name="phoneVerified">False when the user signed in by email and typed their phone number.</param>
+    public User(string cognitoSub, string phoneNumber, string firstName, string lastName, Language language, DateTimeOffset now,
+        string? email = null, bool phoneVerified = true)
     {
         Id = Guid.NewGuid();
         CognitoSub = cognitoSub;
         PhoneNumber = phoneNumber;
+        PhoneVerified = phoneVerified;
+        Email = email;
         CreatedAt = now;
-        UpdateProfile(firstName, lastName, gender, language);
+        UpdateProfile(firstName, lastName, language);
     }
 
     public Guid Id { get; private set; }
@@ -25,9 +29,14 @@ public sealed class User
     /// <summary>E.164 phone number, e.g. +2376XXXXXXXX.</summary>
     public string PhoneNumber { get; private set; } = null!;
 
+    /// <summary>True when the number was confirmed by SMS (phone sign-in); false when typed after an email sign-in.</summary>
+    public bool PhoneVerified { get; private set; }
+
+    /// <summary>Verified email address, for users who sign in by email.</summary>
+    public string? Email { get; private set; }
+
     public string FirstName { get; private set; } = null!;
     public string LastName { get; private set; } = null!;
-    public Gender Gender { get; private set; }
     public Language Language { get; private set; }
 
     public VerificationStatus PassengerStatus { get; private set; } = VerificationStatus.Incomplete;
@@ -42,16 +51,25 @@ public sealed class User
 
     public bool IsSuspended(DateTimeOffset now) => SuspendedUntil is { } until && until > now;
 
-    public void UpdateProfile(string firstName, string lastName, Gender gender, Language language)
+    public void UpdateProfile(string firstName, string lastName, Language language)
     {
         if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
             throw new DomainException("profile.name_required", "First name and last name are required.");
 
         FirstName = firstName.Trim();
         LastName = lastName.Trim();
-        Gender = gender;
         Language = language;
     }
+
+    /// <summary>Users who signed in by email can correct the phone number they typed; an SMS-verified number is fixed.</summary>
+    public void ChangeUnverifiedPhone(string phoneNumber)
+    {
+        if (PhoneVerified)
+            throw new DomainException("profile.phone_locked", "A phone number verified by SMS cannot be changed.");
+        PhoneNumber = phoneNumber;
+    }
+
+    public void SetEmail(string email) => Email = email;
 
     public void SetVerificationStatus(VerificationRole role, VerificationStatus status)
     {

@@ -1,7 +1,7 @@
 # Coco Rider infrastructure (AWS CDK)
 
 One stack (`CocoRider`) with everything the API needs: VPC without NAT, RDS PostgreSQL, S3 documents
-bucket, Cognito user pool (phone + SMS), ECS Fargate service, API Gateway HTTP API, monthly budget.
+bucket, Cognito user pool (phone + SMS code, or email + emailed code when `senderEmail` is set), ECS Fargate service, API Gateway HTTP API, monthly budget.
 Costs and design choices: [docs/architecture.md](../docs/architecture.md).
 Step-by-step guide (AWS account, credentials, first admin, SMS sandbox): [docs/getting-started.md](../docs/getting-started.md).
 

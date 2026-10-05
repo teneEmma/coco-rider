@@ -47,22 +47,10 @@ public class BookingTests
     public void Unverified_passenger_cannot_book()
     {
         var (_, trip) = PublishedTrip();
-        var passenger = new User("sub", "+237690000001", "Paul", "Biya", Gender.Male, Language.English, Now);
+        var passenger = new User("sub", "+237690000001", "Paul", "Biya", Language.English, Now);
 
         var error = Assert.Throws<DomainException>(() => Booking.Request(trip, passenger, 1, PaymentMethod.Cash, Now, Policy));
         Assert.Equal("verification.passenger_not_verified", error.Code);
-    }
-
-    [Fact]
-    public void Women_only_trip_rejects_male_passengers()
-    {
-        var (_, trip) = PublishedTrip(womenOnly: true);
-
-        var error = Assert.Throws<DomainException>(() =>
-            Booking.Request(trip, VerifiedUser(Gender.Male), 1, PaymentMethod.Cash, Now, Policy));
-        Assert.Equal("booking.women_only", error.Code);
-
-        Booking.Request(trip, VerifiedUser(Gender.Female), 1, PaymentMethod.Cash, Now, Policy);
     }
 
     [Fact]

@@ -53,7 +53,6 @@ export const content: Record<Locale, Content> = {
       points: [
         { title: 'Profils vérifiés', text: 'CNI et selfie pour tous ; permis, assurance et carte grise pour les conducteurs.' },
         { title: 'Avis après chaque trajet', text: 'Conducteurs et passagers se notent mutuellement.' },
-        { title: 'Trajets entre femmes', text: 'Les conductrices peuvent réserver leurs trajets aux passagères.' },
         { title: 'Règles claires', text: 'Les retards d\'annulation et les absences sont sanctionnés.' },
       ],
     },
@@ -99,7 +98,6 @@ export const content: Record<Locale, Content> = {
       points: [
         { title: 'Verified profiles', text: 'National ID and selfie for everyone; licence, insurance and registration for drivers.' },
         { title: 'Reviews after every trip', text: 'Drivers and passengers rate each other.' },
-        { title: 'Women-only trips', text: 'Female drivers can reserve their trips for female passengers.' },
         { title: 'Clear rules', text: 'Late cancellations and no-shows are penalized.' },
       ],
     },

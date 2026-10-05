@@ -30,7 +30,7 @@ public sealed class CocoRiderDbContext(DbContextOptions<CocoRiderDbContext> opti
         // Enums are stored as text: readable in SQL and safe when members are reordered.
         Type[] enums =
         [
-            typeof(Language), typeof(Gender), typeof(VerificationStatus), typeof(StrikeReason),
+            typeof(Language), typeof(VerificationStatus), typeof(StrikeReason),
             typeof(DocumentType), typeof(DocumentStatus), typeof(TripKind), typeof(TripStatus),
             typeof(BookingStatus), typeof(PaymentMethod), typeof(DevicePlatform),
         ];
@@ -41,6 +41,8 @@ public sealed class CocoRiderDbContext(DbContextOptions<CocoRiderDbContext> opti
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("postgis");
+        // Accent-insensitive city search ("Yaounde" finds "Yaoundé").
+        modelBuilder.HasPostgresExtension("unaccent");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(CocoRiderDbContext).Assembly);
     }
 }

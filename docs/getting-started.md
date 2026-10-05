@@ -52,8 +52,8 @@ Check: `docker info`, `dotnet --list-sdks`, `node -v`, `flutter doctor`.
 
 ## 2. Run everything locally
 
-Locally the API runs in **development mode**: sign-in has no SMS (any phone number, code
-**123456**), photos are stored in memory, document checks always pass, and push notifications are
+Locally the API runs in **development mode**: sign-in sends no SMS or email (any phone number or
+email address, code **123456**), photos are stored in memory, document checks always pass, and push notifications are
 only written in the API logs. Nothing calls AWS.
 
 Open one terminal per step.
@@ -81,7 +81,7 @@ days) and books Ama on Paul's trip. Sign in with:
 |---|---|---|
 | `690000001` | Ama, verified passenger | search Douala → Yaoundé tomorrow, book, chat, follow Paul live |
 | `670000001` | Paul, verified driver | his trips, accept passengers, share his position |
-| `670000003` | Mireille, verified driver | women-only trip |
+| `670000003` | Mireille, verified driver | her trips to Kribi and Buea |
 | any other number | a new user | full sign-up: profile, documents, then search/publish |
 
 Running it again does not duplicate anything. To start from an empty database:
@@ -194,6 +194,16 @@ In `infra/cdk.json`:
 
 - `"budgetEmail": "you@example.com"` – receives the cost alerts.
 - `"region": "eu-west-1"` (Ireland, recommended – see the region table in `docs/architecture.md`).
+- `"senderEmail": "no-reply@your-domain"` – turns on **sign-in by email**. Cognito only sends
+  email codes through Amazon SES, so first verify this address (or its domain) in **Amazon SES →
+  Identities** in the same region, and request SES production access (the SES sandbox only
+  delivers to verified addresses). Leave it empty to keep sign-in by phone only.
+
+> ⚠️ **Already deployed before email sign-in was added?** Allowing email as a username can only
+> be set when a Cognito user pool is created, so `cdk deploy` **replaces the user pool**. The old
+> pool is kept (retain policy) but its users must sign up again in the new one (their profiles in
+> the database are kept but linked to the old Cognito ids). Fine before launch; with real users,
+> plan a migration first.
 
 ### 3.3 First deployment
 

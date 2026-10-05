@@ -8,7 +8,6 @@ Carpooling app for Cameroon: private drivers and clandos share the cost of inter
 | `backend/aws-dotnet/` | New backend: C# / ASP.NET Core API, PostgreSQL + PostGIS |
 | `web/admin/`, `web/landing/` | React admin dashboard and landing page |
 | `infra/` | AWS infrastructure (CDK, TypeScript) |
-| `backend/functions/`, `firebase.json` | Previous Firebase backend (no longer used by the app) |
 | `docs/architecture.md` | Architecture, costs, business rules, API |
 
 **Start here:** [docs/getting-started.md](docs/getting-started.md) – run everything locally, then deploy to AWS.

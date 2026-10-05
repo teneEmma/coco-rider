@@ -36,6 +36,9 @@ class Auth extends GetxController {
   /// Returns the user's phone number.
   Rx<String?>? get userPhoneNumber => _baseAuthentication.user?.phoneNumber.obs;
 
+  /// The signed-in user (phone number or email), or null.
+  AuthUser? get user => _baseAuthentication.user;
+
   /// Checks if the user is logged in.
   RxBool get userIsLogged => (_baseAuthentication.user != null).obs;
 
@@ -64,8 +67,17 @@ class Auth extends GetxController {
     return _baseAuthentication.authenticateWithPhoneNumber(param);
   }
 
-  /// Attempts to authenticate and verify a user using their phone number and
-  /// an OTP code.
+  /// Sends a one-time code by email.
+  Future<AuthenticationResponse> authenticateWithEmail(
+    EmailAuthenticationParameter param,
+  ) {
+    UtilityFunctions.debugPrint('Email authentication started.',
+        leadingIcons: '🔐🔐🔐');
+    return _baseAuthentication.authenticateWithEmail(param);
+  }
+
+  /// Attempts to authenticate and verify a user using their phone number (or
+  /// email address) and an OTP code.
   Future<AuthenticationResponse> authenticateWithOTPCode(
     String phoneNumber,
     String otpCode, {

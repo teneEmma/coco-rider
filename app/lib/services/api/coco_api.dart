@@ -19,13 +19,14 @@ class ApiException implements Exception {
 }
 
 /// Parameters of a trip search. Either a city or coordinates can be given for each end.
+/// Every field is an optional filter; without a date the API returns all upcoming trips.
 class TripSearch {
-  final DateTime date;
+  final DateTime? date;
   final String? fromCity;
   final String? toCity;
-  final int seats;
+  final int? seats;
 
-  const TripSearch({required this.date, this.fromCity, this.toCity, this.seats = 1});
+  const TripSearch({this.date, this.fromCity, this.toCity, this.seats});
 }
 
 /// Client of the Coco Rider API.
@@ -56,14 +57,15 @@ class CocoApi {
   Future<Profile> saveProfile({
     required String firstName,
     required String lastName,
-    required Gender gender,
     required Language language,
+    // Only for users who signed in by email (no SMS-verified number).
+    String? phoneNumber,
   }) async =>
       Profile.fromJson(await _send('PUT', '/v1/me', {
         'firstName': firstName,
         'lastName': lastName,
-        'gender': apiName(gender),
         'language': apiName(language),
+        if (phoneNumber != null) 'phoneNumber': phoneNumber,
       }));
 
   // ---------- Documents ----------
@@ -123,8 +125,8 @@ class CocoApi {
 
   Future<List<Trip>> searchTrips(TripSearch search) async {
     final query = <String, String>{
-      'date': DateFormat('yyyy-MM-dd').format(search.date),
-      'seats': '${search.seats}',
+      if (search.date != null) 'date': DateFormat('yyyy-MM-dd').format(search.date!),
+      if (search.seats != null) 'seats': '${search.seats}',
       if (search.fromCity != null && search.fromCity!.isNotEmpty) 'fromCity': search.fromCity!,
       if (search.toCity != null && search.toCity!.isNotEmpty) 'toCity': search.toCity!,
     };
@@ -142,7 +144,6 @@ class CocoApi {
     required DateTime departureAt,
     required int seats,
     required int pricePerSeatXaf,
-    required bool womenOnly,
     required bool luggageAllowed,
     required bool smokingAllowed,
     required bool instantBooking,
@@ -156,7 +157,6 @@ class CocoApi {
         'departureAt': departureAt.toUtc().toIso8601String(),
         'seats': seats,
         'pricePerSeatXaf': pricePerSeatXaf,
-        'womenOnly': womenOnly,
         'luggageAllowed': luggageAllowed,
         'smokingAllowed': smokingAllowed,
         'instantBooking': instantBooking,

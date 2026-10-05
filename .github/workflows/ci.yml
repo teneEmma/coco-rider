@@ -76,6 +76,5 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      # lib/teste.dart is a scratch file that does not compile; it is left out until removed.
-      - run: flutter analyze --no-fatal-infos lib/common lib/constants lib/pages lib/services lib/main.dart test
+      - run: flutter analyze --no-fatal-infos
       - run: flutter test

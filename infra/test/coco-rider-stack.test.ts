@@ -7,6 +7,7 @@ const template = Template.fromStack(new CocoRiderStack(new App(), 'Test', {
   env: { account: '123456789012', region: 'eu-west-1' },
   budgetEmail: 'ops@example.com',
   monthlyBudgetUsd: 100,
+  senderEmail: 'no-reply@example.com',
 }));
 
 test('no NAT gateway and no load balancer', () => {
@@ -43,10 +44,24 @@ test('documents bucket is not public', () => {
   });
 });
 
-test('users sign in with their phone number', () => {
+test('users sign in with their phone number or their email', () => {
   template.hasResourceProperties('AWS::Cognito::UserPool', {
-    UsernameAttributes: ['phone_number'],
-    AutoVerifiedAttributes: ['phone_number'],
+    UsernameAttributes: Match.arrayWith(['email', 'phone_number']),
+    AutoVerifiedAttributes: Match.arrayWith(['email', 'phone_number']),
+    Policies: Match.objectLike({
+      SignInPolicy: { AllowedFirstAuthFactors: Match.arrayWith(['EMAIL_OTP', 'SMS_OTP']) },
+    }),
+    EmailConfiguration: Match.objectLike({ EmailSendingAccount: 'DEVELOPER' }),
+  });
+});
+
+test('without a sender address, email codes are off', () => {
+  const noEmail = Template.fromStack(new CocoRiderStack(new App(), 'NoEmail', {
+    env: { account: '123456789012', region: 'eu-west-1' },
+    monthlyBudgetUsd: 100,
+  }));
+  noEmail.hasResourceProperties('AWS::Cognito::UserPool', {
+    Policies: Match.objectLike({ SignInPolicy: { AllowedFirstAuthFactors: ['PASSWORD', 'SMS_OTP'] } }),
   });
 });
 

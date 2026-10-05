@@ -23,14 +23,23 @@ void main() {
     // 06:30 UTC is 07:30 in Cameroon.
     expect(find.textContaining('07:30'), findsOneWidget);
     expect(find.text('5\u00A0000\u00A0FCFA'), findsOneWidget);
-    expect(find.text('Douala · Carrefour Ndokoti'), findsOneWidget);
-    expect(find.text('1 place(s) restante(s)'), findsOneWidget);
+    expect(find.text('DOUALA'), findsOneWidget);
+    expect(find.text('Carrefour Ndokoti'), findsOneWidget);
+    expect(find.text('YAOUNDÉ'), findsOneWidget);
+    // Screen readers hear the whole route at once.
+    expect(
+      find.byWidgetPredicate((w) => w is Semantics && w.properties.label == 'Douala · Carrefour Ndokoti → Yaoundé · Total Mvan'),
+      findsOneWidget,
+    );
+    expect(find.text('PLACES RESTANTES'), findsOneWidget);
+    expect(find.byWidgetPredicate((w) => w is Semantics && w.properties.label == '1 place(s) restante(s)'), findsOneWidget);
     expect(find.text('4.7 (12)'), findsOneWidget);
+    expect(find.text('Interurbain'), findsOneWidget);
   });
 
   testWidgets('switches to English', (tester) async {
     await pump(tester, const Locale('en', 'CM'));
 
-    expect(find.text('1 seat(s) left'), findsOneWidget);
+    expect(find.text('SEATS LEFT'), findsOneWidget);
   });
 }

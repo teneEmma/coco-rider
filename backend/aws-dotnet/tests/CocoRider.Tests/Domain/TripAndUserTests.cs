@@ -16,7 +16,7 @@ public class TripAndUserTests
 
         var error = Assert.Throws<DomainException>(() => Trip.Publish(driver, vehicle, TripKind.Urban,
             new TripLocation("Douala", "Akwa", 4.05, 9.70), new TripLocation("Douala", "Bonamoussadi", 4.09, 9.74),
-            Now.AddHours(2), 2, 500, new TripPreferences(false, true, false, true), null, Now, Policy));
+            Now.AddHours(2), 2, 500, new TripPreferences(true, false, true), null, Now, Policy));
 
         Assert.Equal("verification.driver_not_verified", error.Code);
     }

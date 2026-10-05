@@ -7,7 +7,7 @@
 // Then sign in to the app with one of these numbers (development mode: the code is always 123456):
 //   690 00 00 01  Ama       – verified passenger, booked on Paul's trip leaving soon
 //   670 00 00 01  Paul      – verified driver
-//   670 00 00 03  Mireille  – verified driver (women-only trip)
+//   670 00 00 03  Mireille  – verified driver
 //
 // Safe to run several times: existing users, vehicles and trips are reused.
 // Refuses to run against anything that is not in development mode (it relies on X-Dev-* headers).
@@ -27,13 +27,13 @@ const DRIVER_DOCS = ['NationalId', 'Selfie', 'DriverLicence', 'Insurance', 'Vehi
 const PASSENGER_DOCS = ['NationalId', 'Selfie'];
 
 const users = {
-  paul: { phone: '+237670000001', firstName: 'Paul', lastName: 'Ngono', gender: 'Male', docs: DRIVER_DOCS,
+  paul: { phone: '+237670000001', firstName: 'Paul', lastName: 'Ngono', docs: DRIVER_DOCS,
     vehicle: { make: 'Toyota', model: 'Corolla', color: 'Grise', plateNumber: 'DM 001 CR', passengerSeats: 4 } },
-  brice: { phone: '+237670000002', firstName: 'Brice', lastName: 'Kamga', gender: 'Male', docs: DRIVER_DOCS,
+  brice: { phone: '+237670000002', firstName: 'Brice', lastName: 'Kamga', docs: DRIVER_DOCS,
     vehicle: { make: 'Hyundai', model: 'Elantra', color: 'Noire', plateNumber: 'DM 002 CR', passengerSeats: 4 } },
-  mireille: { phone: '+237670000003', firstName: 'Mireille', lastName: 'Essomba', gender: 'Female', docs: DRIVER_DOCS,
+  mireille: { phone: '+237670000003', firstName: 'Mireille', lastName: 'Essomba', docs: DRIVER_DOCS,
     vehicle: { make: 'Kia', model: 'Picanto', color: 'Rouge', plateNumber: 'DM 003 CR', passengerSeats: 3 } },
-  ama: { phone: '+237690000001', firstName: 'Ama', lastName: 'Tchoua', gender: 'Female', docs: PASSENGER_DOCS },
+  ama: { phone: '+237690000001', firstName: 'Ama', lastName: 'Tchoua', docs: PASSENGER_DOCS },
 };
 
 /** Same identity the app's development login uses for a phone number. */
@@ -66,7 +66,7 @@ const place = (city, landmark) => ({ city, landmark, latitude: CITIES[city][0], 
 async function ensureUser(user) {
   try {
     await call(user, 'PUT', '/v1/me', {
-      firstName: user.firstName, lastName: user.lastName, gender: user.gender, language: 'French',
+      firstName: user.firstName, lastName: user.lastName, language: 'French',
     });
   } catch (e) {
     if (!String(e.message).includes('conflict.duplicate')) throw e;
@@ -94,7 +94,7 @@ async function ensureTrip(driver, trip) {
     && Math.abs(new Date(t.departureAt) - new Date(trip.departureAt)) < 60_000);
   if (same) return same;
   return call(driver, 'POST', '/v1/trips', {
-    vehicleId: driver.vehicleId, kind: 'Intercity', womenOnly: false, luggageAllowed: true,
+    vehicleId: driver.vehicleId, kind: 'Intercity', luggageAllowed: true,
     smokingAllowed: false, instantBooking: true, notes: null, seats: 3, ...trip,
   });
 }
@@ -121,7 +121,7 @@ const trips = [
   [paul, { origin: place('Douala', 'Carrefour Ndokoti'), destination: place('Yaoundé', 'Total Mvan'), departureAt: departure(1, 7), pricePerSeatXaf: 5000 }],
   [brice, { origin: place('Douala', 'Akwa, Total Joss'), destination: place('Yaoundé', 'Poste Centrale'), departureAt: departure(1, 14), pricePerSeatXaf: 6000, instantBooking: false }],
   [brice, { origin: place('Yaoundé', 'Mvan'), destination: place('Bafoussam', 'Marché A'), departureAt: departure(2, 8, 30), pricePerSeatXaf: 5500 }],
-  [mireille, { origin: place('Douala', 'Bonamoussadi'), destination: place('Kribi', 'Plage de la Lobé'), departureAt: departure(2, 9), pricePerSeatXaf: 4000, seats: 2, womenOnly: true }],
+  [mireille, { origin: place('Douala', 'Bonamoussadi'), destination: place('Kribi', 'Plage de la Lobé'), departureAt: departure(2, 9), pricePerSeatXaf: 4000, seats: 2 }],
   [mireille, { origin: place('Douala', 'Bonapriso'), destination: place('Buea', 'Molyko'), departureAt: departure(3, 16), pricePerSeatXaf: 3000, seats: 2 }],
 ];
 

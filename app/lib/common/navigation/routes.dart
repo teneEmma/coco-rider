@@ -8,4 +8,7 @@ class CocoRoutes {
   static const keyTripDetailsPage = '/trip';
   static const keyChatPage = '/chat';
   static const keyTrackingPage = '/tracking';
+  static const keyProfilePage = '/me';
+  static const keyInboxPage = '/inbox';
+  static const keyAddVehiclePage = '/vehicles/new';
 }

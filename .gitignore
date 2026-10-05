@@ -33,8 +33,6 @@ migrate_working_dir/
 # Flutter version manager local configuration file.
 .fvm/
 
-# Firebase related cache files.
-.firebase/
 
 # Firebase temporary build files.
 **/android/app/google-services.json

@@ -22,6 +22,9 @@ public static class Claims
 {
     public const string Subject = "sub";
     public const string Phone = "phone_number";
+    public const string PhoneVerified = "phone_number_verified";
+    public const string Email = "email";
+    public const string EmailVerified = "email_verified";
     public const string Groups = "cognito:groups";
     public const string AdminGroup = "admin";
     public const string AdminPolicy = "admin";
@@ -74,8 +77,9 @@ public static class AuthSetup
 }
 
 /// <summary>
-/// Local development and tests: X-Dev-User is the Cognito sub, X-Dev-Phone the phone number,
-/// X-Dev-Groups a comma separated list of groups (e.g. "admin").
+/// Local development and tests: X-Dev-User is the Cognito sub, X-Dev-Phone the phone number
+/// (phone sign-in) or X-Dev-Email the email address (email sign-in), X-Dev-Groups a comma
+/// separated list of groups (e.g. "admin").
 /// </summary>
 public sealed class DevelopmentAuthHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -92,7 +96,15 @@ public sealed class DevelopmentAuthHandler(
 
         var claims = new List<Claim> { new(Claims.Subject, sub) };
         if (Request.Headers["X-Dev-Phone"].ToString() is { Length: > 0 } phone)
+        {
             claims.Add(new Claim(Claims.Phone, phone));
+            claims.Add(new Claim(Claims.PhoneVerified, "true"));
+        }
+        if (Request.Headers["X-Dev-Email"].ToString() is { Length: > 0 } email)
+        {
+            claims.Add(new Claim(Claims.Email, email));
+            claims.Add(new Claim(Claims.EmailVerified, "true"));
+        }
         foreach (var group in Request.Headers["X-Dev-Groups"].ToString().Split(',', StringSplitOptions.RemoveEmptyEntries))
             claims.Add(new Claim(Claims.Groups, group.Trim()));
 

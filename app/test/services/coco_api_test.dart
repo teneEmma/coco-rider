@@ -39,6 +39,14 @@ void main() {
     expect(trips.single.vehicle, 'Toyota Corolla Grise');
   });
 
+  test('date and seats are optional filters', () async {
+    final api = apiReturning((_) => json([]));
+
+    await api.searchTrips(const TripSearch(toCity: 'Kribi'));
+
+    expect(requests.single.url.queryParameters, {'toCity': 'Kribi'});
+  });
+
   test('sends enums in the API spelling', () async {
     final api = apiReturning((_) => json({
           'id': 'b1',

@@ -7,7 +7,7 @@ import 'package:coco_rider/services/authentication/cognito_client.dart';
 import 'package:coco_rider/services/authentication/token_store.dart';
 import 'package:coco_rider/services/config/app_config.dart';
 
-/// Sign-in with a phone number and an SMS code through Amazon Cognito.
+/// Sign-in with a phone number (SMS code) or an email address (emailed code) through Amazon Cognito.
 class AuthCognitoImplementation implements BaseAuthentication {
   final CognitoClient _cognito;
   final TokenStore _store;
@@ -29,7 +29,11 @@ class AuthCognitoImplementation implements BaseAuthentication {
     final claims = tokens.claims;
     return AuthUser(
       uid: claims['sub'] as String,
-      phoneNumber: claims['phone_number'] as String? ?? '',
+      // Only an SMS-verified number counts; email users type theirs in their profile.
+      phoneNumber: claims['phone_number_verified'] == true
+          ? claims['phone_number'] as String? ?? ''
+          : '',
+      email: claims['email'] as String?,
     );
   }
 
@@ -76,6 +80,26 @@ class AuthCognitoImplementation implements BaseAuthentication {
       return AuthenticationResponse.verificationSuccessful;
     } on CognitoException catch (e) {
       UtilityFunctions.debugPrint('Sending the code failed: $e', leadingIcons: '😓');
+      param.onVerificationFailed(e.type);
+      return AuthenticationResponse.verificationFailed;
+    } catch (e) {
+      param.onVerificationFailed('network-request-failed');
+      return AuthenticationResponse.verificationFailed;
+    }
+  }
+
+  @override
+  Future<AuthenticationResponse> authenticateWithEmail(
+    EmailAuthenticationParameter param,
+  ) async {
+    final email = param.email.trim().toLowerCase();
+    try {
+      _pendingCodes[email] =
+          await _cognito.sendCode(email, channel: SignInChannel.email);
+      param.onVerificationCodeSent();
+      return AuthenticationResponse.verificationSuccessful;
+    } on CognitoException catch (e) {
+      UtilityFunctions.debugPrint('Sending the email code failed: $e', leadingIcons: '😓');
       param.onVerificationFailed(e.type);
       return AuthenticationResponse.verificationFailed;
     } catch (e) {
