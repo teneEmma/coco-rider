@@ -1,0 +1,6 @@
+{
+  "COCO_API_URL": "https://i2xugtokrb.execute-api.us-east-1.amazonaws.com",
+  "COCO_COGNITO_REGION": "us-east-1",
+  "COCO_COGNITO_CLIENT_ID": "7c01v2s6g00g11l0232rkg3op8",
+  "COCO_EMAIL_SIGN_IN": false
+}

@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CocoRider.Api/CocoRider.Api.csproj" />
+    <Project Path="src/CocoRider.Domain/CocoRider.Domain.csproj" />
+    <Project Path="src/CocoRider.Infrastructure/CocoRider.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CocoRider.Tests/CocoRider.Tests.csproj" />
+  </Folder>
+</Solution>
