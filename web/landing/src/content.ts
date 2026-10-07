@@ -26,7 +26,7 @@ export const content: Record<Locale, Content> = {
     nav: { how: 'Comment ça marche', drivers: 'Conducteurs', safety: 'Sécurité', faq: 'Questions' },
     hero: {
       title: 'Voyagez ensemble, partagez les frais.',
-      subtitle: 'Coco Rider met en relation conducteurs et passagers pour les trajets entre villes et les déplacements quotidiens au Cameroun.',
+      subtitle: 'on-go met en relation conducteurs et passagers pour les trajets entre villes et les déplacements quotidiens au Cameroun.',
       soon: 'Bientôt disponible',
     },
     stores: { play: 'Télécharger sur Google Play', apple: 'Télécharger sur l\'App Store' },
@@ -65,13 +65,13 @@ export const content: Record<Locale, Content> = {
         { q: 'Combien ça coûte ?', a: 'L\'application est gratuite pendant le lancement. Vous ne payez que le prix du trajet au conducteur.' },
       ],
     },
-    footer: 'Coco Rider – covoiturage au Cameroun',
+    footer: 'on-go – covoiturage au Cameroun',
   },
   en: {
     nav: { how: 'How it works', drivers: 'Drivers', safety: 'Safety', faq: 'FAQ' },
     hero: {
       title: 'Travel together, share the cost.',
-      subtitle: 'Coco Rider connects drivers and passengers for trips between cities and daily commutes in Cameroon.',
+      subtitle: 'on-go connects drivers and passengers for trips between cities and daily commutes in Cameroon.',
       soon: 'Coming soon',
     },
     stores: { play: 'Get it on Google Play', apple: 'Download on the App Store' },
@@ -110,6 +110,6 @@ export const content: Record<Locale, Content> = {
         { q: 'How much does it cost?', a: 'The app is free during the launch. You only pay the trip price to the driver.' },
       ],
     },
-    footer: 'Coco Rider – carpooling in Cameroon',
+    footer: 'on-go – carpooling in Cameroon',
   },
 };

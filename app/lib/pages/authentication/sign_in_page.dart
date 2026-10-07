@@ -3,6 +3,8 @@ import 'package:coco_rider/common/widgets/coco_ui.dart';
 import 'package:coco_rider/constants/image_keys.dart';
 import 'package:coco_rider/services/authentication/auth.dart';
 import 'package:coco_rider/services/authentication/base_authentication.dart';
+import 'package:coco_rider/services/config/app_config.dart';
+import 'package:coco_rider/common/widgets/brand_logo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -149,19 +151,20 @@ class _SignInPageState extends State<SignInPage> {
                         Text(_error!, style: TextStyle(color: theme.colorScheme.error, fontWeight: FontWeight.w600)),
                       ],
                       const SizedBox(height: 18),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: TextButton(
-                          style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                          onPressed: () => setState(() {
-                            _useEmail = !_useEmail;
-                            _error = null;
-                          }),
-                          child: Text(_useEmail ? 'auth.usePhone'.tr : 'auth.useEmail'.tr),
+                      if (AppConfig.emailSignIn)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton(
+                            style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                            onPressed: () => setState(() {
+                              _useEmail = !_useEmail;
+                              _error = null;
+                            }),
+                            child: Text(_useEmail ? 'auth.usePhone'.tr : 'auth.useEmail'.tr),
+                          ),
                         ),
-                      ),
                       const SizedBox(height: 36),
-                      Center(child: Image.asset(ImageKeys.figmaLogo, width: 110, semanticLabel: 'Coco Rider')),
+                      const Center(child: BrandLogo(height: 30)),
                     ],
                   ),
                 ),

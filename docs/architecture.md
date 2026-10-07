@@ -1,4 +1,4 @@
-# Coco Rider – architecture (MVP)
+# on-go (Coco Rider) – architecture (MVP)
 
 Carpooling for Cameroon: private drivers (and clandos) share the cost of intercity trips
 (Douala ⇄ Yaoundé, Bafoussam, Buea…) and daily commutes inside a city.
@@ -10,18 +10,18 @@ Carpooling for Cameroon: private drivers (and clandos) share the cost of interci
 | Mobile app | Flutter (Android + iOS), French and English |
 | Websites | React: landing page in `web/landing`, admin dashboard in `web/admin`, both on S3 + CloudFront |
 | Backend | C# / ASP.NET Core (.NET 10), one container on ECS Fargate (ARM) – `backend/aws-dotnet` |
-| Database | PostgreSQL 16 + PostGIS on RDS (db.t4g.micro) |
+| Database | PostgreSQL 16 + PostGIS on RDS (db.t3.micro: the ARM db.t4g.micro is not offered for PostgreSQL 16 in us-east-1) |
 | Auth | Amazon Cognito, sign-in with phone number + SMS code, or email + emailed code (sent through Amazon SES) |
 | Documents | Private S3 bucket, automatic checks with Amazon Rekognition, admin review queue for doubtful cases |
 | Infrastructure as code | AWS CDK (TypeScript) – `infra/` |
-| Region | `eu-west-1` (Ireland) – see [Region](#region) |
+| Region | `us-east-1` (N. Virginia) – see [Region](#region) |
 | Payments | No money goes through the app yet: the passenger pays the driver (cash, MTN MoMo, Orange Money). The commission owed is recorded on each booking (0% while free) |
 | Firebase | Only Cloud Messaging (push notifications); the old Firebase backend was removed |
 
 ## Architecture
 
 ```
- Flutter app ──┐                        ┌──────────── AWS (eu-west-1) ─────────────────────────────┐
+ Flutter app ──┐                        ┌──────────── AWS (us-east-1) ─────────────────────────────┐
  Admin (React) ┼─ HTTPS ─► API Gateway ─┼─► VPC link ─► ECS Fargate: CocoRider.Api (.NET, ARM)      │
                │           (HTTP API)   │                   │        │            │                │
                │                        │                   ▼        ▼            ▼                │
@@ -39,11 +39,11 @@ Carpooling for Cameroon: private drivers (and clandos) share the cost of interci
 * Photos of documents never go through the API: the API returns a pre-signed S3 URL, the app uploads, then calls `submit`.
 * Everything runs in public/isolated subnets **without a NAT Gateway or load balancer** (the two most common budget killers).
 
-## Monthly cost estimate (eu-west-1, on-demand, MVP traffic)
+## Monthly cost estimate (on-demand, MVP traffic; us-east-1 is about 5–10% below these figures)
 
 | Item | ~USD/month |
 |---|---|
-| RDS PostgreSQL db.t4g.micro, 20 GB gp3, single-AZ, 7-day backups | 15 – 17 |
+| RDS PostgreSQL db.t3.micro, 20 GB gp3, single-AZ, 7-day backups | 15 – 17 |
 | Fargate ARM task, 0.25 vCPU / 0.5 GB, 24/7 | 7 – 8 |
 | Public IPv4 address of the task | 3.65 |
 | API Gateway HTTP API (first millions of requests) | 1 – 3 |
@@ -70,17 +70,19 @@ The region does change the price, by roughly 5–25% for the same resources:
 
 | Region | Price vs Ireland | Notes |
 |---|---|---|
-| `us-east-1` N. Virginia | ≈ 5–10% cheaper | Much further from Cameroon (higher latency) |
-| **`eu-west-1` Ireland** | reference | Among the cheapest in Europe; Rekognition and Cognito available |
+| **`us-east-1` N. Virginia** | ≈ 5–10% cheaper | **Chosen.** Further from Cameroon (≈ 200–300 ms vs 100–150 ms) |
+| `eu-west-1` Ireland | reference | Among the cheapest in Europe; Rekognition and Cognito available |
 | `eu-west-3` Paris | ≈ 5–10% more | Rekognition is not offered there (as far as we know; check AWS's regional services list) |
 | `af-south-1` Cape Town | ≈ 20–30% more | Opt-in region, fewer services (Rekognition missing as far as we know) |
 
 Internet traffic from Cameroon mostly reaches the world through submarine cables landing in Europe,
 so European regions are usually as fast as Cape Town. At this size the difference between Ireland and
-Paris is only a few dollars; **Ireland wins because of the price and Rekognition**.
+Paris is only a few dollars. **on-go runs in `us-east-1`** (owner's choice, the cheapest region): API calls
+from Cameroon take roughly twice as long as from Ireland. Moving later means migrating the database and
+the Cognito users, so revisit this before launch if latency becomes a problem.
 
 ⚠️ Cameroon's personal data protection law (2024) regulates transfers of personal data abroad.
-Ask a lawyer whether storing ID documents in Ireland requires a declaration or authorization.
+Ask a lawyer whether storing ID documents in the United States requires a declaration or authorization.
 
 ## Business rules (implemented)
 

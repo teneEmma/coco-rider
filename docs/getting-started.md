@@ -1,4 +1,4 @@
-# Getting started: run Coco Rider on your computer, then deploy it to AWS
+# Getting started: run on-go (Coco Rider) on your computer, then deploy it to AWS
 
 This guide has three parts:
 
@@ -193,7 +193,7 @@ budget alert at $100/month if you set your e-mail (step 3.2).
 In `infra/cdk.json`:
 
 - `"budgetEmail": "you@example.com"` – receives the cost alerts.
-- `"region": "eu-west-1"` (Ireland, recommended – see the region table in `docs/architecture.md`).
+- `"region": "us-east-1"` (N. Virginia, the region chosen for on-go – see the region table in `docs/architecture.md`).
 - `"senderEmail": "no-reply@your-domain"` – turns on **sign-in by email**. Cognito only sends
   email codes through Amazon SES, so first verify this address (or its domain) in **Amazon SES →
   Identities** in the same region, and request SES production access (the SES sandbox only
@@ -215,7 +215,7 @@ computer Docker emulates ARM, which makes this step slower).
 (cd web/landing && npm ci && npm run build)
 cd infra
 npm ci
-npx cdk bootstrap aws://<ACCOUNT_ID>/eu-west-1    # once per account and region
+npx cdk bootstrap aws://<ACCOUNT_ID>/us-east-1    # once per account and region
 npx cdk diff                                      # what will be created
 npx cdk deploy                                    # 20–30 minutes the first time
 ```
@@ -256,7 +256,7 @@ Check `<ApiUrl>/health` → `Healthy`.
 cd app
 flutter run \
   --dart-define=COCO_API_URL=<ApiUrl> \
-  --dart-define=COCO_COGNITO_REGION=eu-west-1 \
+  --dart-define=COCO_COGNITO_REGION=us-east-1 \
   --dart-define=COCO_COGNITO_CLIENT_ID=<MobileClientId>
 ```
 

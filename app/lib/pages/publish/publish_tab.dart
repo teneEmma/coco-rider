@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-/// "Coco Ride": the driver's area. Verified drivers publish a trip in three steps.
+/// "Drive": the driver's area. Verified drivers publish a trip in three steps.
 class PublishTab extends StatefulWidget {
   const PublishTab({super.key});
 

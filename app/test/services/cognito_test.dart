@@ -13,11 +13,15 @@ import '../helpers.dart';
 const phone = '+237690000001';
 
 /// Fakes the Cognito API; [handlers] answer per X-Amz-Target action.
+/// Without a SignUp handler the account already exists (UsernameExistsException), as for a returning user.
 MockClient cognitoMock(List<String> calls, Map<String, http.Response Function(Map<String, dynamic>)> handlers) =>
     MockClient((request) async {
       final action = request.headers['X-Amz-Target']!.split('.').last;
       calls.add(action);
       final handler = handlers[action];
+      if (handler == null && action == 'SignUp') {
+        return http.Response('{"__type":"UsernameExistsException","message":"User already exists"}', 400);
+      }
       if (handler == null) return http.Response('{"__type":"Unexpected#$action"}', 400);
       return handler(jsonDecode(request.body) as Map<String, dynamic>);
     });
@@ -57,7 +61,7 @@ void main() {
 
     expect(pending.challenge, CognitoChallenge.signIn);
     expect(result.claims['sub'], 'sub-1');
-    expect(calls, ['InitiateAuth', 'RespondToAuthChallenge']);
+    expect(calls, ['SignUp', 'InitiateAuth', 'RespondToAuthChallenge']);
   });
 
   test('new phone number is registered, confirmed and signed in', () async {
@@ -66,9 +70,11 @@ void main() {
       region: 'eu-west-1',
       clientId: 'client',
       httpClient: cognitoMock(calls, {
-        'InitiateAuth': (body) => body['Session'] == 'after-signup'
-            ? ok(tokens())
-            : http.Response('{"__type":"UserNotFoundException","message":"User does not exist."}', 400),
+        // After sign-up confirmation only: an unknown number never reaches InitiateAuth first.
+        'InitiateAuth': (body) {
+          expect(body['Session'], 'after-signup');
+          return ok(tokens());
+        },
         'SignUp': (body) {
           expect(body['UserAttributes'], [
             {'Name': 'phone_number', 'Value': phone},
@@ -86,7 +92,27 @@ void main() {
     await client.confirmCode(phone, pending, '654321');
 
     expect(pending.challenge, CognitoChallenge.signUp);
-    expect(calls, ['InitiateAuth', 'SignUp', 'ConfirmSignUp', 'InitiateAuth']);
+    expect(calls, ['SignUp', 'ConfirmSignUp', 'InitiateAuth']);
+  });
+
+  test('an account created earlier but never confirmed gets a new code', () async {
+    final calls = <String>[];
+    final client = CognitoClient(
+      region: 'eu-west-1',
+      clientId: 'client',
+      httpClient: cognitoMock(calls, {
+        'InitiateAuth': (_) => http.Response('{"__type":"UserNotConfirmedException","message":"not confirmed"}', 400),
+        'ResendConfirmationCode': (body) {
+          expect(body['Username'], phone);
+          return ok({});
+        },
+      }),
+    );
+
+    final pending = await client.sendCode(phone);
+
+    expect(pending.challenge, CognitoChallenge.signUp);
+    expect(calls, ['SignUp', 'InitiateAuth', 'ResendConfirmationCode']);
   });
 
   test('wrong code is reported with the Cognito error type', () async {
@@ -115,8 +141,7 @@ void main() {
           if (body['Session'] == 'confirmed') {
             return ok(tokens(claims: {'sub': 'sub-2', 'email': email, 'email_verified': true}));
           }
-          expect(body['AuthParameters']['PREFERRED_CHALLENGE'], 'EMAIL_OTP');
-          return http.Response('{"__type":"UserNotFoundException","message":"no user"}', 400);
+          fail('a new address is signed up, not signed in');
         },
         'SignUp': (body) {
           expect(body['Username'], email);
@@ -142,7 +167,7 @@ void main() {
     await auth.authenticateWithOTPCode(email, '654321', onVerificationCompleted: () {}, onVerificationFailed: (e) => fail(e));
 
     expect(sent, isTrue);
-    expect(calls, ['InitiateAuth', 'SignUp', 'ConfirmSignUp', 'InitiateAuth']);
+    expect(calls, ['SignUp', 'ConfirmSignUp', 'InitiateAuth']);
     expect(auth.user?.email, email);
     expect(auth.user?.signedInWithEmail, isTrue);
   });

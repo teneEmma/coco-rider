@@ -25,7 +25,7 @@ Future<void> main() async {
     messaging: FirebasePushMessaging(),
     api: api,
     onForeground: (event) => Get.snackbar(
-      event.title ?? 'Coco Rider',
+      event.title ?? 'on-go',
       event.body ?? '',
       onTap: (_) => _openFromNotification(event),
       duration: const Duration(seconds: 5),
@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Coco Rider',
+      title: 'on-go',
       translations: CocoInternalization(),
       locale: Get.deviceLocale?.languageCode == 'en'
           ? const Locale('en', 'CM')

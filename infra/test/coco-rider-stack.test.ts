@@ -17,7 +17,7 @@ test('no NAT gateway and no load balancer', () => {
 
 test('database is small, private and encrypted', () => {
   template.hasResourceProperties('AWS::RDS::DBInstance', {
-    DBInstanceClass: 'db.t4g.micro',
+    DBInstanceClass: 'db.t3.micro',
     MultiAZ: false,
     PubliclyAccessible: false,
     StorageEncrypted: true,

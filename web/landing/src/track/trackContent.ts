@@ -32,7 +32,7 @@ export const trackContent: Record<Locale, {
     error: 'Impossible de charger le trajet. Nouvel essai dans quelques secondes…',
     loading: 'Chargement…',
     safety: 'En cas de problème, appelez directement votre proche. Urgences : 117 (police), 118 (pompiers).',
-    download: 'Découvrir Coco Rider',
+    download: 'Découvrir on-go',
   },
   en: {
     title: (name) => `Trip with ${name}`,
@@ -49,6 +49,6 @@ export const trackContent: Record<Locale, {
     error: 'Could not load the trip. Retrying in a few seconds…',
     loading: 'Loading…',
     safety: 'If something is wrong, call your relative directly. Emergency: 117 (police), 118 (fire brigade).',
-    download: 'Discover Coco Rider',
+    download: 'Discover on-go',
   },
 };

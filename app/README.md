@@ -1,6 +1,6 @@
-# **COCO RIDER**: A carpooling app.
+# **on-go**: a carpooling app (code name Coco Rider).
 
-Coco Rider connects drivers and passengers in Cameroon to share the cost of
+on-go connects drivers and passengers in Cameroon to share the cost of
 intercity trips and daily commutes. The app talks to the AWS backend in
 `backend/aws-dotnet` (sign-in with Amazon Cognito: phone number + SMS code, or email + emailed code).
 
@@ -46,6 +46,13 @@ If none are shown, follow the device-specific instructions on the
 Run the app against the **local API** (see `backend/aws-dotnet/README.md`).
 No SMS or email is sent: any phone number or email address works with the code `123456`.
 
+**Against the deployed backend (AWS, account 763670091355, us-east-1)** the public settings are in
+`config/aws.json` (API URL, Cognito region and app client id, written from the `cdk deploy` outputs):
+
+```
+fvm flutter run --dart-define-from-file=config/aws.json
+```
+
 The app uses Flutter **3.47.5**, pinned with [fvm](https://fvm.app) in `.fvmrc`: run `fvm flutter …`
 in this folder (in Rider, set the Flutter SDK path to `app/.fvm/flutter_sdk`).
 
@@ -58,8 +65,8 @@ Run it against **AWS** with the values printed by `cdk deploy` (`ApiUrl`, `Mobil
 
 ```
 flutter run \
-  --dart-define=COCO_API_URL=https://xxxx.execute-api.eu-west-1.amazonaws.com \
-  --dart-define=COCO_COGNITO_REGION=eu-west-1 \
+  --dart-define=COCO_API_URL=https://xxxx.execute-api.us-east-1.amazonaws.com \
+  --dart-define=COCO_COGNITO_REGION=us-east-1 \
   --dart-define=COCO_COGNITO_CLIENT_ID=xxxxxxxx
 ```
 

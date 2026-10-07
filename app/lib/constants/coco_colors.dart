@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-/// Colors used by the whole app (Figma "ShareRide" design).
+/// Colors used by the whole app: the on-go brand palette (Figma "on-go brand essentials").
 class CocoColors {
-  /// Main blue: buttons, links, selected tab.
-  static const Color keyPrimary = Color(0xFF007AFF);
+  /// On-go blue: symbol, buttons, links, selected tab.
+  static const Color keyPrimary = Color(0xFF0078FF);
 
-  /// Near-black used for titles and dark buttons.
-  static const Color keyInk = Color(0xFF090909);
+  /// Journey navy: wordmark, headings, dark buttons and the header.
+  static const Color keyInk = Color(0xFF0E1B2E);
 
-  /// Pale blue behind the destination field and selected items.
-  static const Color keyPrimaryTint = Color(0xFFDCEBFF);
+  /// Blue mist: supporting surfaces (destination field, selected items).
+  static const Color keyPrimaryTint = Color(0xFFF2F7FF);
 
   /// Grey fill of the pill-shaped fields and stepper buttons.
   static const Color keyFieldFill = Color(0xFFEBEDF0);

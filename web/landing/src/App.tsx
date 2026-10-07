@@ -71,7 +71,7 @@ export default function App() {
   return (
     <>
       <header className="header">
-        <a href="#top" className="logo">Coco Rider</a>
+        <a href="#top" className="logo">on-go</a>
         <nav aria-label="Sections">
           <a href="#how">{t.nav.how}</a>
           <a href="#drivers">{t.nav.drivers}</a>

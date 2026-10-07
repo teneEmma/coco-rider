@@ -91,8 +91,29 @@ class CognitoClient {
   Uri get _endpoint => Uri.parse('https://cognito-idp.$region.amazonaws.com/');
 
   /// Sends a code by SMS (phone number) or email. New users are registered on the fly.
+  ///
+  /// Sign-up is tried first: the app client hides whether an account exists ("prevent user
+  /// existence errors"), so signing in an unknown number returns a simulated challenge instead
+  /// of UserNotFoundException. SignUp still reports UsernameExistsException, which tells us the
+  /// account exists and the code must sign it in.
   Future<PendingCode> sendCode(String username,
       {SignInChannel channel = SignInChannel.phone}) async {
+    try {
+      await _call('SignUp', {
+        'ClientId': clientId,
+        'Username': username,
+        'UserAttributes': [
+          {
+            'Name': channel == SignInChannel.email ? 'email' : 'phone_number',
+            'Value': username,
+          },
+        ],
+      });
+      return PendingCode(CognitoChallenge.signUp, null, channel);
+    } on CognitoException catch (e) {
+      if (e.type != 'UsernameExistsException') rethrow;
+    }
+
     final challenge = _challengeName(channel);
     try {
       final response = await _call('InitiateAuth', {
@@ -104,26 +125,15 @@ class CognitoClient {
         },
       });
       if (response['ChallengeName'] != challenge) {
-        throw CognitoException(
-            'UnexpectedChallenge', '${response['ChallengeName']}');
+        throw CognitoException('UnexpectedChallenge', '${response['ChallengeName']}');
       }
-      return PendingCode(
-          CognitoChallenge.signIn, response['Session'] as String, channel);
+      return PendingCode(CognitoChallenge.signIn, response['Session'] as String, channel);
     } on CognitoException catch (e) {
-      if (e.type != 'UserNotFoundException') rethrow;
+      // Signed up earlier but never entered the code: send a new confirmation code.
+      if (e.type != 'UserNotConfirmedException') rethrow;
+      await _call('ResendConfirmationCode', {'ClientId': clientId, 'Username': username});
+      return PendingCode(CognitoChallenge.signUp, null, channel);
     }
-
-    await _call('SignUp', {
-      'ClientId': clientId,
-      'Username': username,
-      'UserAttributes': [
-        {
-          'Name': channel == SignInChannel.email ? 'email' : 'phone_number',
-          'Value': username,
-        },
-      ],
-    });
-    return PendingCode(CognitoChallenge.signUp, null, channel);
   }
 
   Future<CognitoTokens> confirmCode(

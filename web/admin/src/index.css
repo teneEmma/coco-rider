@@ -1,15 +1,15 @@
-/* Brand green comes from app/lib/constants/coco_colors.dart (keyPrimary #2FC015).
-   Buttons use a darker step so white text stays readable (WCAG AA). */
+/* on-go brand (app/lib/constants/coco_colors.dart): on-go blue #0078FF, Journey navy #0E1B2E.
+   Buttons use a darker blue so white text stays readable (WCAG AA). */
 :root {
   color-scheme: light;
-  --bg: #f5f3f3;
+  --bg: #f2f7ff;
   --surface: #ffffff;
-  --border: #e2dfdf;
-  --text: #1b1b1b;
-  --text-muted: #5f5f5f;
-  --brand: #2fc015;
-  --brand-strong: #1f7a0f;
-  --brand-strong-hover: #196610;
+  --border: #e3e8f0;
+  --text: #0e1b2e;
+  --text-muted: #4f5b6b;
+  --brand: #0078ff;
+  --brand-strong: #005fcc;
+  --brand-strong-hover: #004fa8;
   --on-brand: #ffffff;
   --danger: #b00000;
   --danger-bg: #fdecec;
@@ -17,10 +17,10 @@
   --warning-bg: #fff4e0;
   --success: #067d17;
   --success-bg: #e8f6ea;
-  --neutral-bg: #efeded;
-  --focus: #1f7a0f;
+  --neutral-bg: #e9eef6;
+  --focus: #005fcc;
   --radius: 10px;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.45;
   color: var(--text);
   background: var(--bg);
@@ -29,23 +29,23 @@
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --bg: #121412;
-    --surface: #1c1f1c;
-    --border: #2f332f;
-    --text: #ecefeb;
-    --text-muted: #a3a8a2;
-    --brand: #4fd435;
-    --brand-strong: #3fb526;
-    --brand-strong-hover: #52c93a;
-    --on-brand: #0b1a08;
+    --bg: #0b1422;
+    --surface: #13233a;
+    --border: #23344e;
+    --text: #eef3fb;
+    --text-muted: #a6b2c4;
+    --brand: #3d9bff;
+    --brand-strong: #3d9bff;
+    --brand-strong-hover: #6ab2ff;
+    --on-brand: #0e1b2e;
     --danger: #ff8a80;
     --danger-bg: #3a1917;
     --warning: #ffc266;
     --warning-bg: #3a2c12;
     --success: #7bdc86;
     --success-bg: #173320;
-    --neutral-bg: #2a2d2a;
-    --focus: #7bdc86;
+    --neutral-bg: #1c2b42;
+    --focus: #7db9ff;
   }
 }
 

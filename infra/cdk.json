@@ -5,8 +5,9 @@
     "exclude": ["README.md", "cdk*.json", "**/*.d.ts", "**/*.js", "tsconfig.json", "package*.json", "node_modules", "test"]
   },
   "context": {
-    "region": "eu-west-1",
-    "budgetEmail": "",
+    "account": "763670091355",
+    "region": "us-east-1",
+    "budgetEmail": "lacmagoulrich@gmail.com",
     "monthlyBudgetUsd": 100,
     "senderEmail": "",
     "@aws-cdk/aws-ecs:enableImdsBlockingDeprecatedFeature": false,

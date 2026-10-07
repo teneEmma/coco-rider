@@ -1,18 +1,19 @@
-/* Brand green from app/lib/constants/coco_colors.dart (#2FC015); darker steps carry text. */
+/* on-go brand (app/lib/constants/coco_colors.dart): on-go blue #0078FF, Journey navy #0E1B2E,
+   Blue mist #F2F7FF. A darker blue carries text on white (WCAG AA). */
 :root {
   color-scheme: light;
   --bg: #ffffff;
-  --bg-soft: #f5f3f3;
+  --bg-soft: #f2f7ff;
   --surface: #ffffff;
-  --border: #e6e3e3;
-  --text: #161816;
-  --text-muted: #555a55;
-  --brand: #2fc015;
-  --brand-text: #1f7a0f;
-  --brand-soft: #e9f8e5;
-  --button: #161816;
+  --border: #e3e8f0;
+  --text: #0e1b2e;
+  --text-muted: #4f5b6b;
+  --brand: #0078ff;
+  --brand-text: #005fcc;
+  --brand-soft: #f2f7ff;
+  --button: #0e1b2e;
   --on-button: #ffffff;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.55;
   color: var(--text);
   background: var(--bg);
@@ -21,17 +22,17 @@
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --bg: #101210;
-    --bg-soft: #171a17;
-    --surface: #1b1e1b;
-    --border: #2c302c;
-    --text: #edf0ec;
-    --text-muted: #a5aba4;
-    --brand: #4fd435;
-    --brand-text: #7be064;
-    --brand-soft: #16301a;
-    --button: #edf0ec;
-    --on-button: #101210;
+    --bg: #0b1422;
+    --bg-soft: #0e1b2e;
+    --surface: #13233a;
+    --border: #23344e;
+    --text: #eef3fb;
+    --text-muted: #a6b2c4;
+    --brand: #3d9bff;
+    --brand-text: #7db9ff;
+    --brand-soft: #13294a;
+    --button: #eef3fb;
+    --on-button: #0e1b2e;
   }
 }
 
@@ -39,7 +40,7 @@
 html { scroll-behavior: smooth; }
 body { margin: 0; background: var(--bg); }
 h1, h2, h3 { line-height: 1.2; margin: 0 0 .75rem; }
-h1 { font-size: clamp(2rem, 6vw, 3.2rem); letter-spacing: -0.02em; }
+h1 { font-size: clamp(2rem, 6vw, 3.2rem); letter-spacing: -0.04em; }
 h2 { font-size: clamp(1.5rem, 4vw, 2rem); }
 h3 { font-size: 1.1rem; }
 p { margin: 0 0 .5rem; }

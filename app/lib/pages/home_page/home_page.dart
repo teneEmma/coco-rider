@@ -57,7 +57,7 @@ class HomeController extends GetxController {
   }
 }
 
-/// The signed-in shell: header with the user's card, then Home / Coco Ride / History.
+/// The signed-in shell: header with the user's card, then Home / Drive / History.
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -82,7 +82,7 @@ class HomePage extends StatelessWidget {
     final page = AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: ColoredBox(
-        color: CocoColors.keyBlack, // Pure black, like the Figma header and its photo.
+        color: CocoColors.keyInk, // Journey navy (brand).
         child: SafeArea(
           bottom: false,
           child: Column(

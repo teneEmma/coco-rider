@@ -1,10 +1,10 @@
 import 'package:coco_rider/constants/coco_colors.dart';
 import 'package:flutter/material.dart';
 
-/// Material theme built from the Figma design: Urbanist, blue primary, grey pill fields,
+/// Material theme from the on-go brand and the Figma screens: Inter, on-go blue, grey pill fields,
 /// rounded buttons and flat cards.
 class CocoTheme {
-  static const fontFamily = 'Urbanist';
+  static const fontFamily = 'Inter';
 
   /// Corner radius of fields, buttons and cards.
   static const double radius = 14;
@@ -35,9 +35,9 @@ class CocoTheme {
 
   static ThemeData darkTheme = _build(const ColorScheme(
     brightness: Brightness.dark,
-    primary: Color(0xFF3D9BFF),
+    primary: Color(0xFF3D9BFF), // on-go blue, lightened for dark backgrounds
     onPrimary: CocoColors.keyWhite,
-    primaryContainer: Color(0xFF0D2A4D),
+    primaryContainer: Color(0xFF13294A),
     onPrimaryContainer: CocoColors.keyWhite,
     secondary: CocoColors.keyWhite,
     onSecondary: CocoColors.keyInk,
@@ -72,9 +72,9 @@ class CocoTheme {
     return base.copyWith(
       scaffoldBackgroundColor: scheme.surface,
       textTheme: base.textTheme.copyWith(
-        headlineLarge: const TextStyle(fontSize: 30, fontWeight: FontWeight.w700, height: 1.2),
-        headlineMedium: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, height: 1.2),
-        headlineSmall: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+        headlineLarge: const TextStyle(fontSize: 30, fontWeight: FontWeight.w700, height: 1.2, letterSpacing: -1.2),
+        headlineMedium: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700, height: 1.2, letterSpacing: -1),
+        headlineSmall: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, letterSpacing: -0.6),
         titleLarge: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
         titleMedium: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         titleSmall: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),

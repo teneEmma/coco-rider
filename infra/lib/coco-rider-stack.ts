@@ -58,7 +58,8 @@ export class CocoRiderStack extends Stack {
     const dbSecurityGroup = new ec2.SecurityGroup(this, 'DatabaseSg', { vpc, description: 'PostgreSQL' });
     const database = new rds.DatabaseInstance(this, 'Database', {
       engine: rds.DatabaseInstanceEngine.postgres({ version: rds.PostgresEngineVersion.VER_16 }),
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T4G, ec2.InstanceSize.MICRO),
+      // db.t3.micro: db.t4g.micro (ARM) is not offered for PostgreSQL 16 in us-east-1 (checked Oct 2026).
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MICRO),
       vpc,
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_ISOLATED },
       securityGroups: [dbSecurityGroup],
@@ -105,11 +106,11 @@ export class CocoRiderStack extends Stack {
         email: { required: false, mutable: true },
       },
       userVerification: {
-        emailSubject: 'Coco Rider : votre code / your code',
-        emailBody: 'Votre code Coco Rider / Your Coco Rider code: {####}',
+        emailSubject: 'on-go : votre code / your code',
+        emailBody: 'Votre code on-go / Your on-go code: {####}',
       },
       email: emailSignIn
-        ? cognito.UserPoolEmail.withSES({ fromEmail: props.senderEmail!, fromName: 'Coco Rider', sesRegion: this.region })
+        ? cognito.UserPoolEmail.withSES({ fromEmail: props.senderEmail!, fromName: 'on-go', sesRegion: this.region })
         : undefined,
       accountRecovery: cognito.AccountRecovery.PHONE_WITHOUT_MFA_AND_EMAIL,
       mfa: cognito.Mfa.OFF,

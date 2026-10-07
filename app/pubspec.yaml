@@ -1,5 +1,5 @@
 name: coco_rider
-description: Carpooling app for Cameroon. Drivers and passengers share the cost
+description: on-go, carpooling app for Cameroon. Drivers and passengers share the cost
   of intercity trips and daily commutes.
 
 # The following line prevents the package from being accidentally published to
@@ -71,22 +71,24 @@ flutter:
 
   assets:
     - assets/images/
+    # on-go brand: the symbol (white mask, tinted in code) and the app icon master.
+    - assets/images/brand/
     # Placeholders cropped from the Figma mock-ups, see assets/FIGMA_IMAGES.md.
     - assets/images/figma/
 
-  # Urbanist (SIL Open Font License, see assets/fonts/OFL.txt), the font of the Figma design.
+  # Inter, the on-go brand typeface (SIL Open Font License, see assets/fonts/OFL-Inter.txt).
   fonts:
-    - family: Urbanist
+    - family: Inter
       fonts:
-        - asset: assets/fonts/Urbanist-Regular.ttf
+        - asset: assets/fonts/Inter-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Urbanist-Medium.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
           weight: 500
-        - asset: assets/fonts/Urbanist-SemiBold.ttf
+        - asset: assets/fonts/Inter-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/Urbanist-Bold.ttf
+        - asset: assets/fonts/Inter-Bold.ttf
           weight: 700
-        - asset: assets/fonts/Urbanist-ExtraBold.ttf
+        - asset: assets/fonts/Inter-ExtraBold.ttf
           weight: 800
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -3,7 +3,7 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 export type Locale = 'fr' | 'en';
 
 const fr = {
-  appName: 'Coco Rider · Admin',
+  appName: 'on-go · Admin',
   'nav.stats': 'Tableau de bord',
   'nav.documents': 'Documents à vérifier',
   'nav.users': 'Utilisateurs',
@@ -63,7 +63,7 @@ const fr = {
 type Key = keyof typeof fr;
 
 const en: Record<Key, string> = {
-  appName: 'Coco Rider · Admin',
+  appName: 'on-go · Admin',
   'nav.stats': 'Dashboard',
   'nav.documents': 'Documents to review',
   'nav.users': 'Users',

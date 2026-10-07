@@ -14,7 +14,7 @@ Requirements: Node 20+, Docker (the API image is built for ARM during `cdk deplo
 (cd ../web/landing && npm ci && npm run build)
 npm ci
 # optional: set "budgetEmail" in cdk.json to receive cost alerts
-npx cdk bootstrap aws://<ACCOUNT_ID>/eu-west-1   # once per account/region
+npx cdk bootstrap aws://<ACCOUNT_ID>/us-east-1   # once per account/region
 npx cdk deploy
 ```
 

@@ -1,6 +1,10 @@
-# Coco Rider
+# on-go (code name: Coco Rider)
 
 Carpooling app for Cameroon: private drivers and clandos share the cost of intercity trips and city commutes.
+
+> **Brand:** the app is called **on-go** (logo, colors and Inter font from the Figma "on-go brand
+> essentials"). "Coco Rider" remains the code name: folders, packages (`coco_rider`, `CocoRider.*`),
+> the AWS stack and the database keep it. The on-go name has not been legally cleared yet.
 
 | Folder | What |
 |---|---|
